@@ -1,9 +1,14 @@
 package controller;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import model.DriveCommand;
 import model.RobotTrajectory;
@@ -36,8 +41,24 @@ public final class RobotIO {
 		return null;
 	}
 	
-	public static boolean writeTrajFile(String p_filepath) {
+	public static boolean writeTrajFile(String[] p_content,String p_filepath) {
+		
 		boolean written = false;
+		
+		try {
+			PrintWriter pw = new PrintWriter(new File(p_filepath));
+			for (int i = 0 ; i < p_content.length ; i++) {
+				pw.write(p_content[i]);
+			}
+	        pw.close();
+	        written = true;
+		} 
+		catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			written = false;
+			e.printStackTrace();
+		}
+		
 		return written;
 	}
 	
@@ -75,11 +96,13 @@ public final class RobotIO {
 	}
 	
 	private static DriveCommand getDriveCommandFromString(String instruction) {
-		DriveCommand dc = new DriveCommand();
 		
+		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,1})[}][-][>]([0-9]+)");
+		Matcher m = p.matcher(instruction);
+		boolean b = m.matches();
+		DriveCommand dc = new DriveCommand(m.group(1),Integer.parseInt(m.group(2)),Integer.parseInt(m.group(3)));
+
 		return dc;
 	}
-	
-	
 	
 }

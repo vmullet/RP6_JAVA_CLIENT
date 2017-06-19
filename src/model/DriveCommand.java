@@ -3,16 +3,23 @@ package model;
 public class DriveCommand {
 
 	private RobotDirection _robotDirection;
-	private int[] _robotSpeed;
+	private int _robotSpeed;
 	private int _commandDuration;
 	
 	public DriveCommand() {
 		_robotDirection = RobotDirection.NONE;
-		_robotSpeed = new int[2];
+		_robotSpeed = 0;
 		_commandDuration = 0;
 	}
 	
-	public DriveCommand(RobotDirection p_direction,int[] p_speed,int p_duration) {
+	public DriveCommand(String dir_letter,int p_speed,int p_duration) {
+		_robotDirection = getDirectionFromCommand(dir_letter);
+		_robotSpeed = p_speed;
+		_commandDuration = p_duration;
+		
+	}
+	
+	public DriveCommand(RobotDirection p_direction,int p_speed,int p_duration) {
 		_robotDirection = p_direction;
 		_robotSpeed = p_speed;
 		_commandDuration = p_duration;
@@ -26,11 +33,11 @@ public class DriveCommand {
 		this._robotDirection = _robotDirection;
 	}
 
-	public int[] get_robotSpeed() {
+	public int get_robotSpeed() {
 		return _robotSpeed;
 	}
 
-	public void set_robotSpeed(int[] _robotSpeed) {
+	public void set_robotSpeed(int _robotSpeed) {
 		this._robotSpeed = _robotSpeed;
 	}
 
@@ -45,7 +52,7 @@ public class DriveCommand {
 	public String toStringCommand() {
 		return getCommandFromDirection(_robotDirection)
 				+ "\n"
-				+ _robotSpeed[0];
+				+ _robotSpeed;
 	}
 	
 	
@@ -81,7 +88,7 @@ public class DriveCommand {
 		return direction;
 	}
 	
-	private static RobotDirection getDirectionFromCommand(String command) {
+	private RobotDirection getDirectionFromCommand(String command) {
 		RobotDirection direction = RobotDirection.NONE;
 		switch(command) {
 		
