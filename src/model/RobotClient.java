@@ -10,24 +10,26 @@ import java.net.UnknownHostException;
 public class RobotClient {
     
 	private String _robotIP;
-    private BufferedReader _buffIn;
     private Socket _robotSocket = null;
-    private PrintWriter _output = null;
     private BufferedReader _input = null;
+    private PrintWriter _output = null;
     
     private RobotState _robotState;
-
     
+    final int CONN_PORT = 2001;
+
     public RobotClient() {	
     	_robotState = RobotState.NONE;
     }
     
-    
-    
-    public RobotState get_robotState() {
-		return _robotState;
+
+    public String get_robotIP() {
+		return _robotIP;
 	}
 
+	public RobotState get_robotState() {
+		return _robotState;
+	}
 
 
 	public void set_robotState(RobotState _robotState) {
@@ -36,12 +38,14 @@ public class RobotClient {
 
 
 	public void openConnection(String p_robotIP){
+		
     	_robotIP = p_robotIP;
         try {
-            _robotSocket = new Socket(p_robotIP, 2001);
-            _output = new PrintWriter(_robotSocket.getOutputStream());
+            _robotSocket = new Socket(p_robotIP, CONN_PORT);
             _input = new BufferedReader(new InputStreamReader(
                     _robotSocket.getInputStream()));
+            _output = new PrintWriter(_robotSocket.getOutputStream());
+            
             while(!_robotSocket.isConnected()) {}
             
             Thread t1 = new Thread() {
@@ -84,35 +88,5 @@ public class RobotClient {
        
     }
     
-    
-    public String readTrajFile(String filePath) {
-    	
-    	String content = "";
-    	TrajectoryMode mode = TrajectoryMode.NONE;
-    	int cnt = 0;
-    	
-    	try (BufferedReader br = new BufferedReader(new FileReader(filePath)))
-		{
-
-			String currentLine="";
-			while ((currentLine=br.readLine()) != null) {
-				
-			content += currentLine+"\n" ; //Ajout des retours à la ligne
-			if (cnt==0) {
-				if (currentLine.equals("--ONCE--"))
-					mode = TrajectoryMode.ONCE;
-				else if (currentLine.equals("--INFINITE--"))
-					mode = TrajectoryMode.INFINITE;
-			}
-			cnt++;		
-			}
-					
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-    	
-    	return content;
-    }
       
 }

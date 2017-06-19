@@ -10,6 +10,11 @@ public class RobotTrajectory {
 	
 	private Thread drive_thread;
 	
+	public RobotTrajectory() {
+		_driveCommands = new ArrayList<DriveCommand>();
+		_trajMode = TrajectoryMode.NONE;
+	}
+	
 	
 	public RobotTrajectory(RobotClient p_client,ArrayList<DriveCommand> p_driveCommands,TrajectoryMode p_mode) {
 		_myClient = p_client;
@@ -17,6 +22,28 @@ public class RobotTrajectory {
 		_trajMode = p_mode;
 	}
 	
+	
+	
+	public RobotClient get_myClient() {
+		return _myClient;
+	}
+
+
+	public void set_myClient(RobotClient _myClient) {
+		this._myClient = _myClient;
+	}
+
+
+	public TrajectoryMode get_trajMode() {
+		return _trajMode;
+	}
+
+
+	public void set_trajMode(TrajectoryMode _trajMode) {
+		this._trajMode = _trajMode;
+	}
+
+
 	public void startAutoPilot() {
 		
 		drive_thread = new Thread() {
@@ -55,13 +82,14 @@ public class RobotTrajectory {
 		_myClient.set_robotState(RobotState.NONE);
 	}
 	
+	public void addDriveCommand(DriveCommand toAdd) {
+		_driveCommands.add(toAdd);
+	}
+	
 	private void executeCommands() {
 		for (int cntCommand = 0 ; cntCommand < _driveCommands.size() ; cntCommand++) {
 			
-			String full_command = getCommandFromDirection(_driveCommands.get(cntCommand).get_robotDirection())
-					+ "\n"
-					+ _driveCommands.get(cntCommand).get_robotSpeed()[0]
-					+ "\n";
+			String full_command = _driveCommands.get(cntCommand).toStringCommand();
 			
 			_myClient.send(full_command);
 			
@@ -110,36 +138,6 @@ public class RobotTrajectory {
 		
 	}
 	
-	private String getCommandFromDirection(RobotDirection p_direction) {
-		String direction = "";
-		
-		switch(p_direction) {
-		
-		case FORWARD:
-			direction = "f";
-			break;
-			
-		case BACKWARD:
-			direction = "b";
-			break;
-			
-		case LEFT:
-			direction = "l";
-			break;
-			
-		case RIGHT:
-			direction = "r";
-			break;
-			
-		case NONE:
-			direction = "";
-			break;
-			
-		default:
-			break;
-			
-		}
-		return direction;
-	}
+	
 	
 }

@@ -1,4 +1,4 @@
-package vue;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -181,7 +181,7 @@ public class RobotClientUI_V2 extends JFrame {
 				fc.setFileFilter(new FileNameExtensionFilter("*.traj", "traj"));
 				if (fc.showOpenDialog(txt_chemin_fichier)==JFileChooser.APPROVE_OPTION) {
 					txt_chemin_fichier.setText(fc.getSelectedFile().getAbsolutePath());
-					System.out.print(_client.readTrajFile(fc.getSelectedFile().getAbsolutePath()));
+					/*System.out.print(_client.readTrajFile(fc.getSelectedFile().getAbsolutePath()));*/
 				}
 			}
 			
