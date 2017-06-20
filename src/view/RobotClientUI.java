@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 
-import model.RobotClient;
+import controller.RobotClient;
 
 import javax.swing.JTextArea;
 import javax.swing.JLabel;

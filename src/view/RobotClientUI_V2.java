@@ -1,65 +1,62 @@
 package view;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 
-import model.RobotClient;
-
 import javax.swing.JTabbedPane;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JFormattedTextField;
-import java.awt.SystemColor;
 import java.text.ParseException;
-
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.JTable;
 import java.awt.GridLayout;
-import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import javax.swing.UIManager;
 
 @SuppressWarnings("serial")
 public class RobotClientUI_V2 extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField txt_chemin_fichier;
-	private RobotClient _client;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					RobotClientUI_V2 frame = new RobotClientUI_V2();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	
+	private JButton _btnStartAutoPilot;
+	private JButton _btnStopAutoPilot;
+	
+	private JButton _btnConnect;
+	private JButton _btnDisconnect;
+	
+	private JButton _btnMoveUpward;
+	private JButton _btnMoveBackward;
+	private JButton _btnTurnLeft;
+	private JButton _btnTurnRight;
+	
+	private JButton _btnStatusUpLeft;
+	private JButton _btnStatusUpRight;
+	private JButton _btnStatusMiddle;
+	private JButton _btnStatusBackLeft;
+	private JButton _btnStatusBackRight;
+	
+	private JButton _btnStatusAutoUpLeft;
+	private JButton _btnStatusAutoUpRight;
+	private JButton _btnStatusAutoMiddle;
+	private JButton _btnStatusAutoBackLeft;
+	private JButton _btnStatusAutoBackRight;
+	
+	private JButton _btnBrowseTrajFile;
+	
+	private JLabel _imgConnectionState;
+	private JLabel _imgBatteryState;
+	
+	private JTextField _txtFilePath;
+	private JTextArea _txtLogArea;
+	
+	private JButton[] _gridTrajPreview;
 
 	/**
 	 * Create the frame.
@@ -96,21 +93,21 @@ public class RobotClientUI_V2 extends JFrame {
 		control_robot_panel.setBounds(570, 53, 394, 406);
 		tabManualControl.add(control_robot_panel);
 		
-		JButton button_1 = new JButton("");
-		button_1.setBounds(148, 13, 100, 100);
-		control_robot_panel.add(button_1);
+		_btnMoveUpward = new JButton("");
+		_btnMoveUpward.setBounds(148, 13, 100, 100);
+		control_robot_panel.add(_btnMoveUpward);
 		
-		JButton button_2 = new JButton("");
-		button_2.setBounds(12, 144, 100, 100);
-		control_robot_panel.add(button_2);
+		_btnMoveBackward = new JButton("");
+		_btnMoveBackward.setBounds(148, 293, 100, 100);
+		control_robot_panel.add(_btnMoveBackward);
 		
-		JButton button_3 = new JButton("");
-		button_3.setBounds(148, 293, 100, 100);
-		control_robot_panel.add(button_3);
+		_btnTurnLeft = new JButton("");
+		_btnTurnLeft.setBounds(12, 144, 100, 100);
+		control_robot_panel.add(_btnTurnLeft);
 		
-		JButton button_4 = new JButton("");
-		button_4.setBounds(282, 144, 100, 100);
-		control_robot_panel.add(button_4);
+		_btnTurnRight = new JButton("");
+		_btnTurnRight.setBounds(282, 144, 100, 100);
+		control_robot_panel.add(_btnTurnRight);
 		
 		JPanel status_robot_panel = new JPanel();
 		status_robot_panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -118,30 +115,26 @@ public class RobotClientUI_V2 extends JFrame {
 		status_robot_panel.setBounds(53, 53, 376, 318);
 		tabManualControl.add(status_robot_panel);
 		
-		JButton button_5 = new JButton("");
-		button_5.setBackground(UIManager.getColor("Button.background"));
-		button_5.setBounds(12, 13, 56, 85);
-		status_robot_panel.add(button_5);
+		_btnStatusUpLeft = new JButton("");
+		_btnStatusUpLeft.setBackground(UIManager.getColor("Button.background"));
+		_btnStatusUpLeft.setBounds(12, 13, 56, 85);
+		status_robot_panel.add(_btnStatusUpLeft);
 		
-		JButton button_6 = new JButton("");
-		button_6.setBounds(12, 220, 56, 85);
-		status_robot_panel.add(button_6);
+		_btnStatusBackLeft = new JButton("");
+		_btnStatusBackLeft.setBounds(12, 220, 56, 85);
+		status_robot_panel.add(_btnStatusBackLeft);
 		
-		JButton button_7 = new JButton("");
-		button_7.setBounds(157, 122, 56, 85);
-		status_robot_panel.add(button_7);
+		_btnStatusMiddle = new JButton("");
+		_btnStatusMiddle.setBounds(157, 122, 56, 85);
+		status_robot_panel.add(_btnStatusMiddle);
 		
-		JButton button_8 = new JButton("");
-		button_8.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		button_8.setBounds(308, 13, 56, 85);
-		status_robot_panel.add(button_8);
+		_btnStatusUpRight = new JButton("");
+		_btnStatusUpRight.setBounds(308, 13, 56, 85);
+		status_robot_panel.add(_btnStatusUpRight);
 		
-		JButton button_9 = new JButton("");
-		button_9.setBounds(308, 220, 56, 85);
-		status_robot_panel.add(button_9);
+		_btnStatusBackRight = new JButton("");
+		_btnStatusBackRight.setBounds(308, 220, 56, 85);
+		status_robot_panel.add(_btnStatusBackRight);
 		
 		JSeparator separator = new JSeparator();
 		separator.setOrientation(SwingConstants.VERTICAL);
@@ -162,31 +155,14 @@ public class RobotClientUI_V2 extends JFrame {
 		panel_choose_file.add(lbl_select_fichier);
 		
 		
-		txt_chemin_fichier = new JTextField();
-		txt_chemin_fichier.setEditable(false);
-		txt_chemin_fichier.setBounds(163, 6, 232, 34);
-		panel_choose_file.add(txt_chemin_fichier);
+		_txtFilePath = new JTextField();
+		_txtFilePath.setEditable(false);
+		_txtFilePath.setBounds(163, 6, 232, 34);
+		panel_choose_file.add(_txtFilePath);
 		
-		JButton btn_select_fichier = new JButton("...");
-		btn_select_fichier.setBounds(408, 6, 80, 34);
-		btn_select_fichier.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				JFileChooser fc = new JFileChooser();
-				fc.setDialogTitle("Choose a Trajectory File...");
-				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				//fc.addChoosableFileFilter(new FileNameExtensionFilter("*.traj", "traj"));
-				fc.setFileFilter(new FileNameExtensionFilter("*.traj", "traj"));
-				if (fc.showOpenDialog(txt_chemin_fichier)==JFileChooser.APPROVE_OPTION) {
-					txt_chemin_fichier.setText(fc.getSelectedFile().getAbsolutePath());
-					/*System.out.print(_client.readTrajFile(fc.getSelectedFile().getAbsolutePath()));*/
-				}
-			}
-			
-		});
-		panel_choose_file.add(btn_select_fichier);
+		_btnBrowseTrajFile = new JButton("...");
+		_btnBrowseTrajFile.setBounds(408, 6, 80, 34);
+		panel_choose_file.add(_btnBrowseTrajFile);
 		
 		
 		JPanel panel_preview_grid = new JPanel();
@@ -199,13 +175,13 @@ public class RobotClientUI_V2 extends JFrame {
 		lbl_preview_traj.setBounds(12, 63, 153, 16);
 		tabAutoControl.add(lbl_preview_traj);
 		
-		JButton btn_start_traj = new JButton("START AUTO PILOT");
-		btn_start_traj.setBounds(823, 92, 159, 164);
-		tabAutoControl.add(btn_start_traj);
+		_btnStartAutoPilot = new JButton("START AUTO PILOT");
+		_btnStartAutoPilot.setBounds(823, 92, 159, 164);
+		tabAutoControl.add(_btnStartAutoPilot);
 		
-		JButton btn_stop_traj = new JButton("STOP AUTO PILOT");
-		btn_stop_traj.setBounds(823, 282, 159, 164);
-		tabAutoControl.add(btn_stop_traj);
+		_btnStopAutoPilot = new JButton("STOP AUTO PILOT");
+		_btnStopAutoPilot.setBounds(823, 282, 159, 164);
+		tabAutoControl.add(_btnStopAutoPilot);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -213,30 +189,33 @@ public class RobotClientUI_V2 extends JFrame {
 		panel.setBounds(507, 92, 304, 354);
 		tabAutoControl.add(panel);
 		
-		JButton button = new JButton("");
-		button.setBackground(UIManager.getColor("Button.background"));
-		button.setBounds(52, 36, 56, 85);
-		panel.add(button);
+		_btnStatusAutoUpLeft = new JButton("");
+		_btnStatusAutoUpLeft.setBackground(UIManager.getColor("Button.background"));
+		_btnStatusAutoUpLeft.setBounds(52, 36, 56, 85);
+		panel.add(_btnStatusAutoUpLeft);
 		
-		JButton button_10 = new JButton("");
-		button_10.setBounds(52, 234, 56, 85);
-		panel.add(button_10);
+		_btnStatusAutoBackLeft = new JButton("");
+		_btnStatusAutoBackLeft.setBounds(52, 234, 56, 85);
+		panel.add(_btnStatusAutoBackLeft);
 		
-		JButton button_11 = new JButton("");
-		button_11.setBounds(107, 136, 85, 85);
-		panel.add(button_11);
+		_btnStatusAutoMiddle = new JButton("");
+		_btnStatusAutoMiddle.setBounds(107, 136, 85, 85);
+		panel.add(_btnStatusAutoMiddle);
 		
-		JButton button_12 = new JButton("");
-		button_12.setBounds(192, 36, 56, 85);
-		panel.add(button_12);
+		_btnStatusAutoUpRight = new JButton("");
+		_btnStatusAutoUpRight.setBounds(192, 36, 56, 85);
+		panel.add(_btnStatusAutoUpRight);
 		
-		JButton button_13 = new JButton("");
-		button_13.setBounds(192, 234, 56, 85);
-		panel.add(button_13);
+		_btnStatusAutoBackRight = new JButton("");
+		_btnStatusAutoBackRight.setBounds(192, 234, 56, 85);
+		panel.add(_btnStatusAutoBackRight);
+		
+		_gridTrajPreview = new JButton[100];
 		
 		for (int i = 0 ; i<100;i++) {
-			JButton btnNewButton_4 = new JButton("");
-			panel_preview_grid.add(btnNewButton_4);
+			JButton _gridBtn = new JButton("");
+			panel_preview_grid.add(_gridBtn);
+			_gridTrajPreview[i] = _gridBtn;
 		}
 		
 		tabbedPane.setEnabledAt(1, true);
@@ -260,9 +239,13 @@ public class RobotClientUI_V2 extends JFrame {
 		formattedTextField.setBounds(92, 20, 139, 41);
 		contentPane.add(formattedTextField);
 		
-		JButton btn_connexion = new JButton("Connexion");
-		btn_connexion.setBounds(248, 21, 160, 41);
-		contentPane.add(btn_connexion);
+		_btnConnect = new JButton("Connexion");
+		_btnConnect.setBounds(248, 21, 160, 41);
+		contentPane.add(_btnConnect);
+		
+		_btnDisconnect = new JButton("D\u00E9connexion");
+		_btnDisconnect.setBounds(435, 20, 150, 41);
+		contentPane.add(_btnDisconnect);
 		
 		JLabel lbl_etat_connexion = new JLabel("Etat de la connexion :");
 		lbl_etat_connexion.setBounds(810, 25, 129, 27);
@@ -280,20 +263,18 @@ public class RobotClientUI_V2 extends JFrame {
 		separator_1.setBounds(27, 637, 985, 10);
 		contentPane.add(separator_1);
 		
-		JTextArea txt_log = new JTextArea();
-		txt_log.setText("[Sun Jun 18 11:04:55 CEST 2017] : D\u00E9marrage de l'application\n");
-		txt_log.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		txt_log.setBackground(Color.WHITE);
-		txt_log.setBounds(27, 666, 988, 142);
-		contentPane.add(txt_log);
+		_txtLogArea = new JTextArea();
+		_txtLogArea.setText("[Sun Jun 18 11:04:55 CEST 2017] : D\u00E9marrage de l'application\n");
+		_txtLogArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		_txtLogArea.setBackground(Color.WHITE);
+		_txtLogArea.setBounds(27, 666, 988, 142);
+		contentPane.add(_txtLogArea);
 		
 		JLabel label = new JLabel("Adresse IP :");
 		label.setBounds(13, 20, 72, 35);
 		contentPane.add(label);
 		
-		JButton btnDeconnexion = new JButton("D\u00E9connexion");
-		btnDeconnexion.setBounds(435, 20, 150, 41);
-		contentPane.add(btnDeconnexion);
+		
 		
 		JLabel lbl_batterie = new JLabel("Etat de la batterie :");
 		lbl_batterie.setBounds(810, 76, 129, 16);
@@ -302,9 +283,8 @@ public class RobotClientUI_V2 extends JFrame {
 		JLabel lbl_img_batterie = new JLabel("");
 		lbl_img_batterie.setBounds(956, 63, 56, 47);
 		contentPane.add(lbl_img_batterie);
-		btnDeconnexion.setVisible(false);
+		_btnDisconnect.setVisible(false);
 		
-		_client = new RobotClient();
 		setFocusable(true);
 	    requestFocusInWindow();
 	}

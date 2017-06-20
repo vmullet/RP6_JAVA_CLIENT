@@ -2,6 +2,8 @@ package model;
 
 import java.util.ArrayList;
 
+import controller.RobotClient;
+
 public class RobotTrajectory {
 
 	private RobotClient _myClient;

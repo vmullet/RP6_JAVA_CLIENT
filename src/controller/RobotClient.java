@@ -1,4 +1,4 @@
-package model;
+package controller;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import model.RobotState;
+import view.RobotClientUI_V2;
 
 public class RobotClient {
     
@@ -15,6 +18,8 @@ public class RobotClient {
     private PrintWriter _output = null;
     
     private RobotState _robotState;
+    
+    private RobotClientUI_V2 _myUI;
     
     final int CONN_PORT = 2001;
 
@@ -87,6 +92,22 @@ public class RobotClient {
         _output.flush();
        
     }
+    
+    
+    public void buildUI() {
+    	_myUI = new RobotClientUI_V2();
+    	prepareUI();
+    }
+    
+    private void prepareUI() {
+    	
+    }
+
+    public void showUI(boolean show) {
+    	_myUI.setVisible(show);
+    }
+    
+    
     
       
 }
