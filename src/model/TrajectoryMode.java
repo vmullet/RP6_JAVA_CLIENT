@@ -2,8 +2,8 @@ package model;
 
 public enum TrajectoryMode {
 
-	NONE,
-	ONCE,
+	NONE, 
+	ONCE, 
 	INFINITE
-	
+
 }

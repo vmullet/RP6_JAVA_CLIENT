@@ -98,14 +98,14 @@ public class RobotClient {
 
 	public void buildUI() {
 		_myUI = new RobotClientUI_V2();
-		
+
 		_myUI.setMouseListeners(RobotDirection.FORWARD, getMouseListenerByDirection(RobotDirection.FORWARD));
 		_myUI.setMouseListeners(RobotDirection.BACKWARD, getMouseListenerByDirection(RobotDirection.BACKWARD));
 		_myUI.setMouseListeners(RobotDirection.LEFT, getMouseListenerByDirection(RobotDirection.LEFT));
 		_myUI.setMouseListeners(RobotDirection.RIGHT, getMouseListenerByDirection(RobotDirection.RIGHT));
-		
+
 		_myUI.addKeyListener(getKeyListener());
-		
+
 		_myUI.writeToLogArea("Démarrage de l'application");
 	}
 
@@ -116,13 +116,16 @@ public class RobotClient {
 			boolean pressed = false;
 
 			@Override
-			public void mouseClicked(MouseEvent e) {}
+			public void mouseClicked(MouseEvent e) {
+			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {}
+			public void mouseEntered(MouseEvent e) {
+			}
 
 			@Override
-			public void mouseExited(MouseEvent e) {}
+			public void mouseExited(MouseEvent e) {
+			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -178,29 +181,29 @@ public class RobotClient {
 			@Override
 			public void keyPressed(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 				if (!launched) {
-					
+
 					launched = true;
 					Thread t1 = new Thread() {
 						@Override
 						public void run() {
 							pressed = true;
 							String command = "";
-							switch(arg0.getKeyCode()) {
-				        	case KeyEvent.VK_UP:
-				        		command = "f\n";
-				        		break;
-				        	case KeyEvent.VK_DOWN:
-				        		command = "b\n";
-				        		break;
-				        	case KeyEvent.VK_LEFT:
-				        		command = "l\n";
-				        		break;
-				        	case KeyEvent.VK_RIGHT:
-				        		command = "r\n";
-				        		break;
-				        	}
+							switch (arg0.getKeyCode()) {
+							case KeyEvent.VK_UP:
+								command = "f\n";
+								break;
+							case KeyEvent.VK_DOWN:
+								command = "b\n";
+								break;
+							case KeyEvent.VK_LEFT:
+								command = "l\n";
+								break;
+							case KeyEvent.VK_RIGHT:
+								command = "r\n";
+								break;
+							}
 							// send(command);
 
 							while (pressed) {
@@ -217,12 +220,11 @@ public class RobotClient {
 							}
 						}
 					};
-					
+
 					t1.start();
-					
+
 				}
-				
-				
+
 			}
 
 			@Override
@@ -238,7 +240,6 @@ public class RobotClient {
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
-				System.out.println("fffff");
 			}
 
 		};
@@ -248,7 +249,7 @@ public class RobotClient {
 	public void showUI(boolean show) {
 		_myUI.setVisible(show);
 		_myUI.showBatteryState(20);
-		
+
 	}
 
 }
