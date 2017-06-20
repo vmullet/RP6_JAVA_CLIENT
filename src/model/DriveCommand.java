@@ -56,7 +56,7 @@ public class DriveCommand {
 	}
 	
 	
-	private String getCommandFromDirection(RobotDirection p_direction) {
+	public static String getCommandFromDirection(RobotDirection p_direction) {
 		String direction = "";
 		
 		switch(p_direction) {

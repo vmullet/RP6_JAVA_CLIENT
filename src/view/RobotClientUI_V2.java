@@ -5,17 +5,25 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 
+import model.RobotDirection;
+
 import javax.swing.JTabbedPane;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JFormattedTextField;
 import java.text.ParseException;
+import java.util.Date;
+
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.UIManager;
@@ -52,11 +60,35 @@ public class RobotClientUI_V2 extends JFrame {
 	
 	private JLabel _imgConnectionState;
 	private JLabel _imgBatteryState;
+	private JLabel _lblBatteryPercent;
+	private JLabel _lblBatteryWarning;
 	
 	private JTextField _txtFilePath;
 	private JTextArea _txtLogArea;
 	
 	private JButton[] _gridTrajPreview;
+	
+	private boolean _stopConnectBlink = true;
+	private boolean _stopBatteryBlink = true;
+	
+	static String UP_ARROW_PATH = "resources\\up-arrow.png";
+	static String DOWN_ARROW_PATH = "resources\\down-arrow.png";
+	static String LEFT_ARROW_PATH = "resources\\left-arrow.png";
+	static String RIGHT_ARROW_PATH = "resources\\right-arrow.png";
+	
+	static String BATTERY_100_PATH = "resources\\battery-100.png";
+	static String BATTERY_75_PATH = "resources\\battery-75.png";
+	static String BATTERY_50_PATH = "resources\\battery-50.png";
+	static String BATTERY_25_PATH = "resources\\battery-25.png";
+	static String BATTERY_00_PATH = "resources\\battery-00.png";
+	
+	static String WARNING_PATH = "resources\\warning.png";
+	
+	static String TRAFFIC_LIGHT_BLACK = "resources\\traffic-light-black.png";
+	static String TRAFFIC_LIGHT_RED = "resources\\traffic-light-red.png";
+	static String TRAFFIC_LIGHT_YELLOW = "resources\\traffic-light-yellow.png";
+	static String TRAFFIC_LIGHT_GREEN = "resources\\traffic-light-green.png";
+	
 
 	/**
 	 * Create the frame.
@@ -64,14 +96,14 @@ public class RobotClientUI_V2 extends JFrame {
 	public RobotClientUI_V2() {
 		setTitle("RP6 Robot Client");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1090, 868);
+		setBounds(100, 100, 1090, 914);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(13, 103, 999, 503);
+		tabbedPane.setBounds(13, 145, 999, 503);
 		contentPane.add(tabbedPane);
 		
 		JPanel tabManualControl = new JPanel();
@@ -248,26 +280,25 @@ public class RobotClientUI_V2 extends JFrame {
 		contentPane.add(_btnDisconnect);
 		
 		JLabel lbl_etat_connexion = new JLabel("Etat de la connexion :");
-		lbl_etat_connexion.setBounds(810, 25, 129, 27);
+		lbl_etat_connexion.setBounds(781, 28, 129, 27);
 		contentPane.add(lbl_etat_connexion);
 		
-		JLabel lbl_img_etat_connexion = new JLabel("");
-		lbl_img_etat_connexion.setBounds(956, 14, 56, 47);
-		contentPane.add(lbl_img_etat_connexion);
+		_imgConnectionState = new JLabel("");
+		_imgConnectionState.setBounds(904, 13, 72, 96);
+		contentPane.add(_imgConnectionState);
 		
 		JLabel lbl_log = new JLabel("Log :");
-		lbl_log.setBounds(23, 607, 56, 27);
+		lbl_log.setBounds(23, 661, 56, 27);
 		contentPane.add(lbl_log);
 		
 		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(27, 637, 985, 10);
+		separator_1.setBounds(27, 689, 985, 10);
 		contentPane.add(separator_1);
 		
 		_txtLogArea = new JTextArea();
-		_txtLogArea.setText("[Sun Jun 18 11:04:55 CEST 2017] : D\u00E9marrage de l'application\n");
 		_txtLogArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		_txtLogArea.setBackground(Color.WHITE);
-		_txtLogArea.setBounds(27, 666, 988, 142);
+		_txtLogArea.setBounds(24, 712, 988, 142);
 		contentPane.add(_txtLogArea);
 		
 		JLabel label = new JLabel("Adresse IP :");
@@ -277,15 +308,134 @@ public class RobotClientUI_V2 extends JFrame {
 		
 		
 		JLabel lbl_batterie = new JLabel("Etat de la batterie :");
-		lbl_batterie.setBounds(810, 76, 129, 16);
+		lbl_batterie.setBounds(13, 99, 129, 16);
 		contentPane.add(lbl_batterie);
 		
-		JLabel lbl_img_batterie = new JLabel("");
-		lbl_img_batterie.setBounds(956, 63, 56, 47);
-		contentPane.add(lbl_img_batterie);
+		_imgBatteryState = new JLabel("");
+		_imgBatteryState.setBounds(136, 85, 108, 47);
+		contentPane.add(_imgBatteryState);
+		
+		_lblBatteryPercent = new JLabel("");
+		_lblBatteryPercent.setBounds(247, 75, 56, 57);
+		contentPane.add(_lblBatteryPercent);
+		
+		_lblBatteryWarning = new JLabel("");
+		_lblBatteryWarning.setBounds(305, 75, 71, 57);
+		contentPane.add(_lblBatteryWarning);
 		_btnDisconnect.setVisible(false);
 		
+		setIcons();
 		setFocusable(true);
 	    requestFocusInWindow();
+	}
+	
+	public void setMouseListeners(RobotDirection direction,MouseListener listener) {
+		switch(direction) {
+		case FORWARD:
+			_btnMoveUpward.addMouseListener(listener);
+			break;
+		case BACKWARD:
+			_btnMoveBackward.addMouseListener(listener);
+			break;
+		case LEFT:
+			_btnTurnLeft.addMouseListener(listener);
+			break;
+		case RIGHT:
+			_btnTurnRight.addMouseListener(listener);
+			break;
+		case NONE:
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private void setIcons() {
+		_btnMoveUpward.setIcon(new ImageIcon(UP_ARROW_PATH));
+		_btnMoveBackward.setIcon(new ImageIcon(DOWN_ARROW_PATH));
+		_btnTurnLeft.setIcon(new ImageIcon(LEFT_ARROW_PATH));
+		_btnTurnRight.setIcon(new ImageIcon(RIGHT_ARROW_PATH));
+		
+		_imgConnectionState.setIcon(new ImageIcon(TRAFFIC_LIGHT_RED));
+	}
+	
+	public void startBlinkConnectImg() {
+		_stopConnectBlink = false;
+		ImageIcon ic1 = new ImageIcon("resources\\traffic-light-yellow.png");
+		ImageIcon ic2 = new ImageIcon("resources\\traffic-light-black.png");
+		Thread t1 = new Thread() {
+			@Override
+			public void run() {
+				while(!_stopConnectBlink) {
+					_imgConnectionState.setIcon(ic1);
+					try {
+						Thread.sleep(500);
+						_imgConnectionState.setIcon(ic2);
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		t1.start();
+	}
+	
+	public void stopBlinkConnectImg() {
+		_stopConnectBlink = true;
+	}
+	
+	public void startBlinkBattery() {
+		_stopBatteryBlink = false;
+		ImageIcon ic1 = new ImageIcon("resources\\battery-25.png");
+		ImageIcon ic2 = new ImageIcon("resources\\battery-00.png");
+		Thread t1 = new Thread() {
+			@Override
+			public void run() {
+				while(!_stopConnectBlink) {
+					_imgBatteryState.setIcon(ic1);
+					try {
+						Thread.sleep(500);
+						_imgBatteryState.setIcon(ic2);
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		t1.start();
+		
+	}
+	
+	public void stopBlinkBattery() {
+		_stopBatteryBlink = true;
+	}
+	
+	public void showBatteryState(int batteryValue) {
+		ImageIcon ic1 = null;
+		_lblBatteryWarning.setIcon(null);
+		if (batteryValue<=100&&batteryValue>75)
+			ic1 = new ImageIcon(BATTERY_100_PATH);
+		else if (batteryValue<=75&&batteryValue>50)
+			ic1 = new ImageIcon(BATTERY_75_PATH);
+		else if (batteryValue<=50&&batteryValue>25)
+			ic1 = new ImageIcon(BATTERY_50_PATH);
+		else if (batteryValue<=25&&batteryValue>0) {
+			ic1 = new ImageIcon(BATTERY_25_PATH);
+			_lblBatteryWarning.setIcon(new ImageIcon(WARNING_PATH));
+			if (_stopBatteryBlink)
+			startBlinkBattery();
+		}
+			
+		
+		_lblBatteryPercent.setText("(" + batteryValue + "%)");
+		_imgBatteryState.setIcon(ic1);
+	}
+	
+	public void writeToLogArea(String message) {
+		_txtLogArea.setText(_txtLogArea.getText() + "["  + new Date() + "] : " + message + "\n");
 	}
 }
