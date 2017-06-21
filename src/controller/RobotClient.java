@@ -33,6 +33,8 @@ public class RobotClient {
 	private RobotState _robotState;
 
 	private RobotClientUI_V2 _myUI;
+	
+	private RobotTrajectory _loadedTrajectory;
 
 	final int CONN_PORT = 2001;
 
@@ -128,7 +130,13 @@ public class RobotClient {
 		
 		_myUI.setBtnConnectListener(getConnectButtonListener());
 		
+		_myUI.setBtnDisconnectListener(getDisconnectButtonListener());
+		
 		_myUI.setBrowseFileListener(getBrowseFileListener());
+		
+		_myUI.setBtnStartAutoPilotListener(getStartAutoPilotListener());
+		
+		_myUI.setBtnStopAutoPilotListener(getStopAutoPilotListener());
 		
 		_myUI.writeToLogArea("Démarrage de l'application");
 	}
@@ -283,13 +291,12 @@ public class RobotClient {
 				if (returned == JFileChooser.APPROVE_OPTION) {
 					String selectedPath = fc.getSelectedFile().getAbsolutePath();
 					_myUI.get_txtFilePath().setText(selectedPath);
-					RobotTrajectory rt = RobotIO.readTrajFile(selectedPath);
-					if (rt == null)
+					_loadedTrajectory = RobotIO.readTrajFile(selectedPath);
+					if (_loadedTrajectory == null)
 						JOptionPane.showMessageDialog(_myUI, "Le fichier .traj n'est pas valide");
 					else {
-						rt.set_myClient(rc);
-						drawTrajOnGrid(rt);
-						rt.startAutoPilot();
+						_loadedTrajectory.set_myClient(rc);
+						drawTrajOnGrid(_loadedTrajectory);
 					}
 					
 				}
@@ -302,17 +309,53 @@ public class RobotClient {
 	
 	private ActionListener getConnectButtonListener() {
 		ActionListener listener = new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
 				openConnection(_myUI.get_txtAdrIp());
 			}
 			
 		};
 		return listener;
 	}
+	
+	private ActionListener getDisconnectButtonListener() {
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				closeConnection();
+			}
+			
+		};
+		return listener;
+	}
+	
+	private ActionListener getStartAutoPilotListener() {
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				_loadedTrajectory.startAutoPilot();
+			}
+			
+		};
+		return listener;
+	}
+	
+	private ActionListener getStopAutoPilotListener() {
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				_loadedTrajectory.stopAutoPilot();
+			}
+			
+		};
+		return listener;
+	}
+	
+	
 	
 	public void drawTrajOnGrid(RobotTrajectory rt) {
 		int arrival = _myUI.get_gridBaseStartPoint(); // Point de départ

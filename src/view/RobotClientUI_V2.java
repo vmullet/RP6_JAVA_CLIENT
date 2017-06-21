@@ -11,7 +11,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JFormattedTextField;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 
 import javax.swing.JTextField;
@@ -362,6 +360,19 @@ public class RobotClientUI_V2 extends JFrame {
 	public void setBtnConnectListener(ActionListener listener) {
 		_btnConnect.addActionListener(listener);
 	}
+	
+	public void setBtnDisconnectListener(ActionListener listener) {
+		_btnDisconnect.addActionListener(listener);
+	}
+	
+	public void setBtnStartAutoPilotListener(ActionListener listener) {
+		_btnStartAutoPilot.addActionListener(listener);
+	}
+	
+	public void setBtnStopAutoPilotListener(ActionListener listener) {
+		_btnStopAutoPilot.addActionListener(listener);
+	}
+	
 
 	private void setIcons() {
 		_btnMoveUpward.setIcon(new ImageIcon(UP_ARROW_PATH));

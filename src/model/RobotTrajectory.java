@@ -47,6 +47,14 @@ public class RobotTrajectory {
 		return _driveCommands.get(index);
 	}
 
+	public int getTotalDuration() {
+		int duration = 0;
+		for (int i = 0 ; i< _driveCommands.size() ; i++) {
+			duration += _driveCommands.get(i).get_commandDuration();
+		}
+		return duration;
+	}
+	
 	public void startAutoPilot() {
 
 		drive_thread = new Thread() {
@@ -56,6 +64,7 @@ public class RobotTrajectory {
 
 				switch (_trajMode) {
 				case ONCE:
+					_myClient.set_robotState(RobotState.READY_TO_START);
 					executeCommands();
 					_myClient.get_myUI().unSelectCurrentSegment();
 					break;
@@ -82,7 +91,7 @@ public class RobotTrajectory {
 
 	}
 
-	public void stopAutopilot() {
+	public void stopAutoPilot() {
 		_myClient.set_robotState(RobotState.NONE);
 	}
 
@@ -91,7 +100,8 @@ public class RobotTrajectory {
 	}
 
 	private void executeCommands() {
-		for (int cntCommand = 0; cntCommand < _driveCommands.size(); cntCommand++) {
+		int cntCommand = 0;
+		while(cntCommand < _driveCommands.size() && _myClient.get_robotState() != RobotState.NONE) {
 
 			String full_command = _driveCommands.get(cntCommand).toStringCommand();
 
@@ -107,6 +117,7 @@ public class RobotTrajectory {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			cntCommand++;
 		}
 	}
 
