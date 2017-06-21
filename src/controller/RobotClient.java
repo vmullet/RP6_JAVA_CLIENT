@@ -282,6 +282,7 @@ public class RobotClient {
 				int returned = fc.showOpenDialog(_myUI.get_btnBrowseTrajFile());
 				if (returned == JFileChooser.APPROVE_OPTION) {
 					String selectedPath = fc.getSelectedFile().getAbsolutePath();
+					_myUI.get_txtFilePath().setText(selectedPath);
 					RobotTrajectory rt = RobotIO.readTrajFile(selectedPath);
 					if (rt == null)
 						JOptionPane.showMessageDialog(_myUI, "Le fichier .traj n'est pas valide");

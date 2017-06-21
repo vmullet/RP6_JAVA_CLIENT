@@ -376,8 +376,12 @@ public class RobotClientUI_V2 extends JFrame {
 	public JButton get_btnBrowseTrajFile() {
 		return _btnBrowseTrajFile;
 	}
-
 	
+	
+	public JTextField get_txtFilePath() {
+		return _txtFilePath;
+	}
+
 	public int get_gridBaseStartPoint() {
 		return _baseStartPoint;
 	}
