@@ -38,6 +38,14 @@ public class RobotTrajectory {
 	public void set_trajMode(TrajectoryMode _trajMode) {
 		this._trajMode = _trajMode;
 	}
+	
+	public int getCommandsListSize() {
+		return _driveCommands.size();
+	}
+	
+	public DriveCommand getCommandAt(int index) {
+		return _driveCommands.get(index);
+	}
 
 	public void startAutoPilot() {
 
@@ -49,6 +57,7 @@ public class RobotTrajectory {
 				switch (_trajMode) {
 				case ONCE:
 					executeCommands();
+					_myClient.get_myUI().unSelectCurrentSegment();
 					break;
 
 				case INFINITE:
@@ -56,7 +65,7 @@ public class RobotTrajectory {
 					while (_myClient.get_robotState() != RobotState.NONE) {
 						executeCommands();
 					}
-
+					_myClient.get_myUI().unSelectCurrentSegment();
 					break;
 
 				case NONE:
@@ -86,9 +95,11 @@ public class RobotTrajectory {
 
 			String full_command = _driveCommands.get(cntCommand).toStringCommand();
 
-			_myClient.send(full_command);
+			//_myClient.send(full_command);
 
 			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(cntCommand).get_robotDirection()));
+			
+			_myClient.get_myUI().selectSegment(cntCommand);
 
 			try {
 				Thread.sleep(_driveCommands.get(cntCommand).get_commandDuration() * 1000);

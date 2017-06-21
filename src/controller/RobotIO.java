@@ -66,8 +66,8 @@ public final class RobotIO {
 		readFileContent(p_filepath);
 		if (_readFile.get(0).equals("--BEGIN--") && _readFile.get(_readFile.size() - 1).equals("--END--")
 				&& (_readFile.get(1).equals("**ONCE**") || _readFile.get(1).equals("**LOOP**"))) {
-			for (int i = 1; i < _readFile.size() - 1; i++) {
-				if (!_readFile.get(i).matches("[f|b|l|r]{[0-9]{1,2}[}][->][0-9]+"))
+			for (int i = 2; i < _readFile.size() - 1; i++) {
+				if (!_readFile.get(i).matches("[f|b|l|r][{][0-9]{1,1}[}][-][>][0-9]+"))
 					return false;
 			}
 		} else {

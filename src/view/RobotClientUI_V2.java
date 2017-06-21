@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JFormattedTextField;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
@@ -21,6 +22,7 @@ import javax.swing.JTextArea;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 
@@ -63,10 +65,19 @@ public class RobotClientUI_V2 extends JFrame {
 	private JLabel _lblBatteryPercent;
 	private JLabel _lblBatteryWarning;
 
+	private JTextField _txtAdrIp;
 	private JTextField _txtFilePath;
 	private JTextArea _txtLogArea;
 
+	private JPanel _gridPanel;
 	private JButton[] _gridTrajPreview;
+	private int _gridSize;
+	private int _baseStartPoint;
+	private HashMap<Integer,int[]> _segmentMap;
+	private int _selectedSegmentIndex;
+	
+	
+	private Color _defaultButtonColor;
 
 	private boolean _stopConnectBlink = true;
 	private boolean _stopBatteryBlink = true;
@@ -194,14 +205,14 @@ public class RobotClientUI_V2 extends JFrame {
 		_btnBrowseTrajFile.setBounds(408, 6, 80, 34);
 		panel_choose_file.add(_btnBrowseTrajFile);
 
-		JPanel panel_preview_grid = new JPanel();
-		panel_preview_grid.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_preview_grid.setBounds(10, 92, 484, 354);
-		tabAutoControl.add(panel_preview_grid);
-		panel_preview_grid.setLayout(new GridLayout(10, 10, 0, 0));
+		_gridPanel = new JPanel();
+		_gridPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		_gridPanel.setBounds(10, 79, 484, 381);
+		tabAutoControl.add(_gridPanel);
+		
 
 		JLabel lbl_preview_traj = new JLabel("Aper\u00E7u de la trajectoire :");
-		lbl_preview_traj.setBounds(12, 63, 153, 16);
+		lbl_preview_traj.setBounds(10, 61, 153, 16);
 		tabAutoControl.add(lbl_preview_traj);
 
 		_btnStartAutoPilot = new JButton("START AUTO PILOT");
@@ -239,13 +250,9 @@ public class RobotClientUI_V2 extends JFrame {
 		_btnStatusAutoBackRight.setBounds(192, 234, 56, 85);
 		panel.add(_btnStatusAutoBackRight);
 
-		_gridTrajPreview = new JButton[100];
-
-		for (int i = 0; i < 100; i++) {
-			JButton _gridBtn = new JButton("");
-			panel_preview_grid.add(_gridBtn);
-			_gridTrajPreview[i] = _gridBtn;
-		}
+		
+		_defaultButtonColor = _btnStatusAutoBackLeft.getBackground();
+		
 
 		tabbedPane.setEnabledAt(1, true);
 
@@ -262,11 +269,11 @@ public class RobotClientUI_V2 extends JFrame {
 			e.printStackTrace();
 		}
 
-		JFormattedTextField formattedTextField = new JFormattedTextField(mf);
-		formattedTextField.setFont(new Font("Tahoma", Font.BOLD, 16));
-		formattedTextField.setColumns(10);
-		formattedTextField.setBounds(92, 20, 139, 41);
-		contentPane.add(formattedTextField);
+		_txtAdrIp = new JTextField();
+		_txtAdrIp.setFont(new Font("Tahoma", Font.BOLD, 16));
+		_txtAdrIp.setColumns(10);
+		_txtAdrIp.setBounds(92, 20, 139, 41);
+		contentPane.add(_txtAdrIp);
 
 		_btnConnect = new JButton("Connexion");
 		_btnConnect.setBounds(248, 21, 160, 41);
@@ -319,6 +326,9 @@ public class RobotClientUI_V2 extends JFrame {
 		contentPane.add(_lblBatteryWarning);
 		_btnDisconnect.setVisible(false);
 
+		_segmentMap = new HashMap<Integer,int[]>();
+		_selectedSegmentIndex = -1;
+		
 		setIcons();
 		setFocusable(true);
 		requestFocusInWindow();
@@ -344,6 +354,14 @@ public class RobotClientUI_V2 extends JFrame {
 			break;
 		}
 	}
+	
+	public void setBrowseFileListener(ActionListener listener) {
+		_btnBrowseTrajFile.addActionListener(listener);
+	}
+	
+	public void setBtnConnectListener(ActionListener listener) {
+		_btnConnect.addActionListener(listener);
+	}
 
 	private void setIcons() {
 		_btnMoveUpward.setIcon(new ImageIcon(UP_ARROW_PATH));
@@ -353,11 +371,47 @@ public class RobotClientUI_V2 extends JFrame {
 
 		_imgConnectionState.setIcon(new ImageIcon(TRAFFIC_LIGHT_RED));
 	}
+	
+
+	public JButton get_btnBrowseTrajFile() {
+		return _btnBrowseTrajFile;
+	}
+
+	
+	public int get_gridBaseStartPoint() {
+		return _baseStartPoint;
+	}
+	
+	
+	
+	public String get_txtAdrIp() {
+		return _txtAdrIp.getText();
+	}
+
+	private void setStartPointButton(int size) {
+		_baseStartPoint = (size/2 + 1) * (size - 1);
+		_gridTrajPreview[_baseStartPoint].setBackground(new Color(255,0,0));
+		setGridButtonText(_baseStartPoint,"R");
+	}
+	
+	public void buildGrid(int size) {
+		_gridSize = size;
+		_gridTrajPreview = new JButton[size * size];
+		_gridPanel.setLayout(new GridLayout(size, size, 0, 0));
+		for (int i = 0 ; i < size * size ; i++) {
+			
+			JButton _gridBtn = new JButton("");
+			_gridPanel.add(_gridBtn);
+			_gridTrajPreview[i] = _gridBtn;
+			
+		}
+		setStartPointButton(size);
+	}
 
 	public void startBlinkConnectImg() {
 		_stopConnectBlink = false;
-		ImageIcon ic1 = new ImageIcon("resources\\traffic-light-yellow.png");
-		ImageIcon ic2 = new ImageIcon("resources\\traffic-light-black.png");
+		ImageIcon ic1 = new ImageIcon(TRAFFIC_LIGHT_YELLOW);
+		ImageIcon ic2 = new ImageIcon(TRAFFIC_LIGHT_BLACK);
 		Thread t1 = new Thread() {
 			@Override
 			public void run() {
@@ -380,15 +434,24 @@ public class RobotClientUI_V2 extends JFrame {
 	public void stopBlinkConnectImg() {
 		_stopConnectBlink = true;
 	}
+	
+	public void setConnectImg(boolean connected) {
+		ImageIcon ic1 = new ImageIcon(TRAFFIC_LIGHT_RED);
+		ImageIcon ic2 = new ImageIcon(TRAFFIC_LIGHT_GREEN);
+		if (connected)
+			_imgConnectionState.setIcon(ic2);
+		else
+			_imgConnectionState.setIcon(ic1);
+	}
 
 	public void startBlinkBattery() {
 		_stopBatteryBlink = false;
-		ImageIcon ic1 = new ImageIcon("resources\\battery-25.png");
-		ImageIcon ic2 = new ImageIcon("resources\\battery-00.png");
+		ImageIcon ic1 = new ImageIcon(BATTERY_25_PATH);
+		ImageIcon ic2 = new ImageIcon(BATTERY_00_PATH);
 		Thread t1 = new Thread() {
 			@Override
 			public void run() {
-				while (!_stopConnectBlink) {
+				while (!_stopBatteryBlink) {
 					_imgBatteryState.setIcon(ic1);
 					try {
 						Thread.sleep(500);
@@ -432,4 +495,133 @@ public class RobotClientUI_V2 extends JFrame {
 	public void writeToLogArea(String message) {
 		_txtLogArea.setText(_txtLogArea.getText() + "[" + new Date() + "] : " + message + "\n");
 	}
+	
+	public void setGridButtonText(int index,String text) {
+		_gridTrajPreview[index].setForeground(Color.WHITE);
+		_gridTrajPreview[index].setFont(new Font("Arial", Font.PLAIN, 12));
+		_gridTrajPreview[index].setText(text);
+	}
+	
+	private void selectButton(int index,Color color) {
+		_gridTrajPreview[index].setBackground(color);
+	}
+	
+	private void unSelectTrajButton(int index,Color color) {
+		if (index != _baseStartPoint)
+			_gridTrajPreview[index].setBackground(color);
+		else
+			_gridTrajPreview[index].setBackground(Color.RED);
+	}
+	
+	private void unSelectButton(int index) {
+		_gridTrajPreview[index].setBackground(_defaultButtonColor);
+	}
+	
+	public int[] selectGridNeighBoorButtons(int nbButtons,RobotDirection direction,int actual,String text) {
+		int lastIndex = -1;
+		int[] indexList = new int[nbButtons];
+		
+		switch(direction) {
+			case FORWARD:
+				for (int i = 0 ; i < nbButtons; i++) {
+					lastIndex = actual - _gridSize * (i+1);
+					if (lastIndex != _baseStartPoint) {
+						selectButton(lastIndex,Color.BLACK);
+						setGridButtonText(lastIndex,text);
+					}
+					indexList[i] = lastIndex;
+					
+				}
+				break;
+			
+			case BACKWARD:
+				for (int i = 0 ; i < nbButtons; i++) {
+					lastIndex = actual + _gridSize * (i+1);
+					if (lastIndex != _baseStartPoint) {
+						selectButton(lastIndex,Color.BLACK);
+						setGridButtonText(lastIndex,text);
+					}
+					indexList[i] = lastIndex;
+					
+				}
+				break;
+				
+			case LEFT:
+				for (int i = 0 ; i < nbButtons; i++) {
+					lastIndex = actual - (i+1);
+					if (lastIndex != _baseStartPoint) {
+						selectButton(lastIndex,Color.BLACK);
+						setGridButtonText(lastIndex,text);
+					}
+					indexList[i] = lastIndex;
+					
+				}
+				break;
+				
+			case RIGHT:
+				for (int i = 0 ; i < nbButtons; i++) {
+					lastIndex = actual + (i+1);
+					if (lastIndex != _baseStartPoint) {
+						selectButton(lastIndex,Color.BLACK);
+						setGridButtonText(lastIndex,text);
+					}
+					indexList[i] = lastIndex;
+					
+				}
+				break;
+				
+			case NONE:
+				break;
+				
+			default:
+				break;
+			
+		}
+		return indexList;
+	}
+	
+	public void addSegmentToMap(int commandIndex,int[] indexList) {
+		_segmentMap.put(commandIndex,indexList);
+	}
+	
+	public void selectSegment(int index) {
+		if (_selectedSegmentIndex != -1)
+			unSelectSegment(_selectedSegmentIndex);
+		
+		_selectedSegmentIndex = index;
+		int[] btnIndexes = _segmentMap.get(index);
+		for (int i = 0 ; i < btnIndexes.length ; i++) {
+			selectButton(btnIndexes[i],Color.GREEN);
+		}
+		
+	}
+	
+	public void unSelectSegment(int index) {
+		
+		int[] btnIndexes = _segmentMap.get(index);
+		for (int i = 0 ; i < btnIndexes.length ; i++) {
+			unSelectTrajButton(btnIndexes[i],Color.BLACK);
+		}
+		
+	}
+	
+	public void unSelectCurrentSegment() {
+		
+		int[] btnIndexes = _segmentMap.get(_selectedSegmentIndex);
+		for (int i = 0 ; i < btnIndexes.length ; i++) {
+			unSelectTrajButton(btnIndexes[i],Color.BLACK);
+		}
+		
+	}
+	
+
+	public void resetGrid() {
+		for (int i = 0 ; i < _gridTrajPreview.length ; i++) {
+			unSelectButton(i);
+			_gridTrajPreview[i].setText("");
+		}
+	}
+	
+	
+	
 }

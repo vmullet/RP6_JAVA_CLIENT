@@ -104,17 +104,7 @@ public class RobotClientUI extends JFrame {
 		txt_adr_ip.setColumns(10);
 
 		JButton btn_connexion = new JButton("Connexion");
-		btn_connexion.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				writeLog("Connexion en cours vers " + txt_adr_ip.getText() + "...");
-				_client.openConnection("192.168.1.9");
-				_client.send("cmd\r\n");
-			}
-
-		});
+		
 		btn_connexion.setBounds(229, 13, 97, 38);
 		contentPane.add(btn_connexion);
 

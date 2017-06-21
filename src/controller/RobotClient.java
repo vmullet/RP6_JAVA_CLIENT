@@ -1,5 +1,7 @@
 package controller;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -12,9 +14,13 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 import model.DriveCommand;
 import model.RobotDirection;
 import model.RobotState;
+import model.RobotTrajectory;
 import view.RobotClientUI_V2;
 
 public class RobotClient {
@@ -45,27 +51,42 @@ public class RobotClient {
 	public void set_robotState(RobotState _robotState) {
 		this._robotState = _robotState;
 	}
+	
+
+	public RobotClientUI_V2 get_myUI() {
+		return _myUI;
+	}
+
 
 	public void openConnection(String p_robotIP) {
 
 		_robotIP = p_robotIP;
-		try {
-			_robotSocket = new Socket(p_robotIP, CONN_PORT);
-			_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
-			_output = new PrintWriter(_robotSocket.getOutputStream());
-
-			while (!_robotSocket.isConnected()) {
-			}
-
+		System.out.println(_robotIP);
+		
+		
 			Thread t1 = new Thread() {
 				public void run() {
 					try {
+						_myUI.startBlinkConnectImg();
+						Thread.sleep(2000);
+						_robotSocket = new Socket(p_robotIP, CONN_PORT);
+						_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
+						_output = new PrintWriter(_robotSocket.getOutputStream());
+						while(!_robotSocket.isConnected()) {}
+						
+						
+						_myUI.setConnectImg(true);
+						
 						String message = "";
 						while ((message = _input.readLine()) != null) {
 							System.out.println(_input.readLine());
 						}
-					} catch (IOException e) {
+						
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
+						_myUI.stopBlinkConnectImg();
+						_myUI.setConnectImg(false);
+						JOptionPane.showMessageDialog(_myUI, "Connection Time out");
 						e.printStackTrace();
 					}
 
@@ -73,17 +94,15 @@ public class RobotClient {
 
 			};
 			t1.start();
-		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host: " + _robotIP);
-		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for " + "the connection to: " + _robotIP);
-		}
+		
+			
 	}
 
 	public void closeConnection() {
 		try {
 			if (_robotSocket != null)
 				_robotSocket.close();
+			_myUI.setConnectImg(false);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,14 +117,19 @@ public class RobotClient {
 
 	public void buildUI() {
 		_myUI = new RobotClientUI_V2();
-
+		
+		_myUI.buildGrid(11);
 		_myUI.setMouseListeners(RobotDirection.FORWARD, getMouseListenerByDirection(RobotDirection.FORWARD));
 		_myUI.setMouseListeners(RobotDirection.BACKWARD, getMouseListenerByDirection(RobotDirection.BACKWARD));
 		_myUI.setMouseListeners(RobotDirection.LEFT, getMouseListenerByDirection(RobotDirection.LEFT));
 		_myUI.setMouseListeners(RobotDirection.RIGHT, getMouseListenerByDirection(RobotDirection.RIGHT));
 
 		_myUI.addKeyListener(getKeyListener());
-
+		
+		_myUI.setBtnConnectListener(getConnectButtonListener());
+		
+		_myUI.setBrowseFileListener(getBrowseFileListener());
+		
 		_myUI.writeToLogArea("Démarrage de l'application");
 	}
 
@@ -208,7 +232,6 @@ public class RobotClient {
 
 							while (pressed) {
 								try {
-									System.out.println(command + speed);
 									Thread.sleep(1000);
 									if (speed < 10)
 										speed++;
@@ -245,10 +268,69 @@ public class RobotClient {
 		};
 		return listener;
 	}
+	
+	private ActionListener getBrowseFileListener() {
+		RobotClient rc = this;
+		ActionListener listener = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				JFileChooser fc = new JFileChooser();
+				fc.setDialogTitle("Choisissez un fichier .traj");
+				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				int returned = fc.showOpenDialog(_myUI.get_btnBrowseTrajFile());
+				if (returned == JFileChooser.APPROVE_OPTION) {
+					String selectedPath = fc.getSelectedFile().getAbsolutePath();
+					RobotTrajectory rt = RobotIO.readTrajFile(selectedPath);
+					if (rt == null)
+						JOptionPane.showMessageDialog(_myUI, "Le fichier .traj n'est pas valide");
+					else {
+						rt.set_myClient(rc);
+						drawTrajOnGrid(rt);
+						rt.startAutoPilot();
+					}
+					
+				}
+			}
+			
+		};
+		
+		return listener;
+	}
+	
+	private ActionListener getConnectButtonListener() {
+		ActionListener listener = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+				openConnection(_myUI.get_txtAdrIp());
+			}
+			
+		};
+		return listener;
+	}
+	
+	public void drawTrajOnGrid(RobotTrajectory rt) {
+		int arrival = _myUI.get_gridBaseStartPoint(); // Point de départ
+		int[] indexList = null;
+		for (int i = 0 ; i < rt.getCommandsListSize() ; i++) {
+			
+			DriveCommand dc = rt.getCommandAt(i);
+			indexList = _myUI.selectGridNeighBoorButtons(2, dc.get_robotDirection(), arrival, dc.get_robotSpeed() + "");
+			_myUI.addSegmentToMap(i,indexList); // Ajout des points du segment à la hashmap (l'index du segment est l'index de la commande)
+			arrival = indexList[indexList.length - 1]; // Dernier point du segment dessiné (point de départ du prochain)
+		}
+	}
 
 	public void showUI(boolean show) {
+		
 		_myUI.setVisible(show);
-		_myUI.showBatteryState(20);
+		_myUI.showBatteryState(100);
+		
+		
 
 	}
 
