@@ -1,10 +1,19 @@
 package controller;
 
+import view.RobotClientUI_V2;
+
 public class Launcher {
 
 	public static void main(String[] args) {
-		RobotClient rc = new RobotClient();
-		rc.buildUI();
-		rc.showUI(true);
+		if (args.length == 0) {
+			RobotClientUI_V2 rc = new RobotClientUI_V2();
+			rc.setVisible(true);
+		}
+		else {
+			/* *********************** CONSOLE MODE ***************************** */
+			System.out.println(args.length);
+			
+		}
+		
 	}
 }

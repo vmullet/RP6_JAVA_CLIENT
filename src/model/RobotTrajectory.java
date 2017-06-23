@@ -66,15 +66,15 @@ public class RobotTrajectory {
 				case ONCE:
 					_myClient.set_robotState(RobotState.READY_TO_START);
 					executeCommands();
-					_myClient.get_myUI().unSelectCurrentSegment();
+					//_myClient.get_myUI().unSelectCurrentSegment();
 					break;
 
-				case INFINITE:
+				case LOOP:
 					_myClient.set_robotState(RobotState.READY_TO_START);
 					while (_myClient.get_robotState() != RobotState.NONE) {
 						executeCommands();
 					}
-					_myClient.get_myUI().unSelectCurrentSegment();
+					//_myClient.get_myUI().unSelectCurrentSegment();
 					break;
 
 				case NONE:
@@ -109,7 +109,7 @@ public class RobotTrajectory {
 
 			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(cntCommand).get_robotDirection()));
 			
-			_myClient.get_myUI().selectSegment(cntCommand);
+			//_myClient.get_myUI().selectSegment(cntCommand);
 
 			try {
 				Thread.sleep(_driveCommands.get(cntCommand).get_commandDuration() * 1000);

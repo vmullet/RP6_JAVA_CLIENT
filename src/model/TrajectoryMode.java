@@ -4,6 +4,6 @@ public enum TrajectoryMode {
 
 	NONE, 
 	ONCE, 
-	INFINITE
+	LOOP
 
 }

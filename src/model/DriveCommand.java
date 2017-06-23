@@ -29,24 +29,24 @@ public class DriveCommand {
 		return _robotDirection;
 	}
 
-	public void set_robotDirection(RobotDirection _robotDirection) {
-		this._robotDirection = _robotDirection;
+	public void set_robotDirection(RobotDirection p_robotDirection) {
+		this._robotDirection = p_robotDirection;
 	}
 
 	public int get_robotSpeed() {
 		return _robotSpeed;
 	}
 
-	public void set_robotSpeed(int _robotSpeed) {
-		this._robotSpeed = _robotSpeed;
+	public void set_robotSpeed(int p_robotSpeed) {
+		this._robotSpeed = p_robotSpeed;
 	}
 
 	public int get_commandDuration() {
 		return _commandDuration;
 	}
 
-	public void set_commandDuration(int _commandDuration) {
-		this._commandDuration = _commandDuration;
+	public void set_commandDuration(int p_commandDuration) {
+		this._commandDuration = p_commandDuration;
 	}
 
 	public String toStringCommand() {
@@ -85,7 +85,7 @@ public class DriveCommand {
 		return direction;
 	}
 
-	private RobotDirection getDirectionFromCommand(String command) {
+	private static RobotDirection getDirectionFromCommand(String command) {
 		RobotDirection direction = RobotDirection.NONE;
 		switch (command) {
 

@@ -1,11 +1,5 @@
 package controller;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,14 +8,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
 import model.DriveCommand;
 import model.RobotDirection;
 import model.RobotState;
-import model.RobotTrajectory;
-import view.RobotClientUI_V2;
 
 public class RobotClient {
 
@@ -32,11 +21,9 @@ public class RobotClient {
 
 	private RobotState _robotState;
 
-	private RobotClientUI_V2 _myUI;
+	private boolean _is_connecting;
 	
-	private RobotTrajectory _loadedTrajectory;
-
-	final int CONN_PORT = 2001;
+	static int CONN_PORT = 2000;
 
 	public RobotClient() {
 		_robotState = RobotState.NONE;
@@ -50,34 +37,44 @@ public class RobotClient {
 		return _robotState;
 	}
 
-	public void set_robotState(RobotState _robotState) {
-		this._robotState = _robotState;
+	public void set_robotState(RobotState p_robotState) {
+		this._robotState = p_robotState;
+	}
+
+	public boolean get_is_connected() {
+		return _robotSocket.isConnected();
+	}
+
+	public boolean get_is_connecting() {
+		return _is_connecting;
+	}
+
+	public void set_is_connecting(boolean p_is_connecting) {
+		this._is_connecting = p_is_connecting;
 	}
 	
-
-	public RobotClientUI_V2 get_myUI() {
-		return _myUI;
+	
+	public static int getCONN_PORT() {
+		return CONN_PORT;
 	}
-
 
 	public void openConnection(String p_robotIP) {
 
 		_robotIP = p_robotIP;
 		System.out.println(_robotIP);
-		
-		
+		_is_connecting = true;
 			Thread t1 = new Thread() {
 				public void run() {
-					try {
-						_myUI.startBlinkConnectImg();
-						Thread.sleep(2000);
-						_robotSocket = new Socket(p_robotIP, CONN_PORT);
+					try {	
+						_robotSocket = new Socket(_robotIP, CONN_PORT);
 						_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
-						_output = new PrintWriter(_robotSocket.getOutputStream());
-						while(!_robotSocket.isConnected()) {}
+						_output = new PrintWriter(_robotSocket.getOutputStream(),true);
+						Thread.sleep(2000);
 						
+						send("");
+						send("cmd");
 						
-						_myUI.setConnectImg(true);
+						_is_connecting = false;
 						
 						String message = "";
 						while ((message = _input.readLine()) != null) {
@@ -86,9 +83,7 @@ public class RobotClient {
 						
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						_myUI.stopBlinkConnectImg();
-						_myUI.setConnectImg(false);
-						JOptionPane.showMessageDialog(_myUI, "Connection Time out");
+						_is_connecting = false;
 						e.printStackTrace();
 					}
 
@@ -101,281 +96,25 @@ public class RobotClient {
 	}
 
 	public void closeConnection() {
-		try {
-			if (_robotSocket != null)
-				_robotSocket.close();
-			_myUI.setConnectImg(false);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			if (_robotSocket != null) {
+						send("quit");
+						try {
+							_robotSocket.close();
+							_input = null;
+							_output = null;
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+						
 	}
 
-	public void send(String s) {
-		_output.println(s);
+	public void send(String p_message) {
+		_output.println(p_message);
 		_output.flush();
 
 	}
 
-	public void buildUI() {
-		_myUI = new RobotClientUI_V2();
-		
-		_myUI.buildGrid(11);
-		_myUI.setMouseListeners(RobotDirection.FORWARD, getMouseListenerByDirection(RobotDirection.FORWARD));
-		_myUI.setMouseListeners(RobotDirection.BACKWARD, getMouseListenerByDirection(RobotDirection.BACKWARD));
-		_myUI.setMouseListeners(RobotDirection.LEFT, getMouseListenerByDirection(RobotDirection.LEFT));
-		_myUI.setMouseListeners(RobotDirection.RIGHT, getMouseListenerByDirection(RobotDirection.RIGHT));
-
-		_myUI.addKeyListener(getKeyListener());
-		
-		_myUI.setBtnConnectListener(getConnectButtonListener());
-		
-		_myUI.setBtnDisconnectListener(getDisconnectButtonListener());
-		
-		_myUI.setBrowseFileListener(getBrowseFileListener());
-		
-		_myUI.setBtnStartAutoPilotListener(getStartAutoPilotListener());
-		
-		_myUI.setBtnStopAutoPilotListener(getStopAutoPilotListener());
-		
-		_myUI.writeToLogArea("Démarrage de l'application");
-	}
-
-	private MouseListener getMouseListenerByDirection(RobotDirection direction) {
-		MouseListener listener = new MouseListener() {
-
-			int speed = 1;
-			boolean pressed = false;
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-				Thread t1 = new Thread() {
-					@Override
-					public void run() {
-						pressed = true;
-						String command = DriveCommand.getCommandFromDirection(direction) + "\n";
-						// send(command);
-
-						while (pressed) {
-							try {
-								System.out.println(command + speed);
-								Thread.sleep(800);
-								if (speed < 10)
-									speed++;
-
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}
-				};
-
-				t1.start();
-
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				// send("stop\n");
-				System.out.println("stop");
-				pressed = false;
-				speed = 1;
-				_myUI.requestFocusInWindow();
-			}
-
-		};
-		return listener;
-	}
-
-	private KeyListener getKeyListener() {
-		KeyListener listener = new KeyListener() {
-
-			int speed = 1;
-			boolean pressed = false;
-			boolean launched = false;
-
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-
-				if (!launched) {
-
-					launched = true;
-					Thread t1 = new Thread() {
-						@Override
-						public void run() {
-							pressed = true;
-							String command = "";
-							switch (arg0.getKeyCode()) {
-							case KeyEvent.VK_UP:
-								command = "f\n";
-								break;
-							case KeyEvent.VK_DOWN:
-								command = "b\n";
-								break;
-							case KeyEvent.VK_LEFT:
-								command = "l\n";
-								break;
-							case KeyEvent.VK_RIGHT:
-								command = "r\n";
-								break;
-							}
-							// send(command);
-
-							while (pressed) {
-								try {
-									Thread.sleep(1000);
-									if (speed < 10)
-										speed++;
-
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
-					};
-
-					t1.start();
-
-				}
-
-			}
-
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				// send("stop\n");
-				System.out.println("stop");
-				pressed = false;
-				launched = false;
-				speed = 1;
-				_myUI.requestFocusInWindow();
-			}
-
-			@Override
-			public void keyTyped(KeyEvent arg0) {
-			}
-
-		};
-		return listener;
-	}
-	
-	private ActionListener getBrowseFileListener() {
-		RobotClient rc = this;
-		ActionListener listener = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				JFileChooser fc = new JFileChooser();
-				fc.setDialogTitle("Choisissez un fichier .traj");
-				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				int returned = fc.showOpenDialog(_myUI.get_btnBrowseTrajFile());
-				if (returned == JFileChooser.APPROVE_OPTION) {
-					String selectedPath = fc.getSelectedFile().getAbsolutePath();
-					_myUI.get_txtFilePath().setText(selectedPath);
-					_loadedTrajectory = RobotIO.readTrajFile(selectedPath);
-					if (_loadedTrajectory == null)
-						JOptionPane.showMessageDialog(_myUI, "Le fichier .traj n'est pas valide");
-					else {
-						_loadedTrajectory.set_myClient(rc);
-						drawTrajOnGrid(_loadedTrajectory);
-					}
-					
-				}
-			}
-			
-		};
-		
-		return listener;
-	}
-	
-	private ActionListener getConnectButtonListener() {
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				openConnection(_myUI.get_txtAdrIp());
-			}
-			
-		};
-		return listener;
-	}
-	
-	private ActionListener getDisconnectButtonListener() {
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				closeConnection();
-			}
-			
-		};
-		return listener;
-	}
-	
-	private ActionListener getStartAutoPilotListener() {
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				_loadedTrajectory.startAutoPilot();
-			}
-			
-		};
-		return listener;
-	}
-	
-	private ActionListener getStopAutoPilotListener() {
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				_loadedTrajectory.stopAutoPilot();
-			}
-			
-		};
-		return listener;
-	}
-	
-	
-	
-	public void drawTrajOnGrid(RobotTrajectory rt) {
-		int arrival = _myUI.get_gridBaseStartPoint(); // Point de départ
-		int[] indexList = null;
-		for (int i = 0 ; i < rt.getCommandsListSize() ; i++) {
-			
-			DriveCommand dc = rt.getCommandAt(i);
-			indexList = _myUI.selectGridNeighBoorButtons(2, dc.get_robotDirection(), arrival, dc.get_robotSpeed() + "");
-			_myUI.addSegmentToMap(i,indexList); // Ajout des points du segment à la hashmap (l'index du segment est l'index de la commande)
-			arrival = indexList[indexList.length - 1]; // Dernier point du segment dessiné (point de départ du prochain)
-		}
-	}
-
-	public void showUI(boolean show) {
-		
-		_myUI.setVisible(show);
-		_myUI.showBatteryState(100);
-		
-		
-
-	}
 
 }

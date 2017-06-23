@@ -29,7 +29,7 @@ public final class RobotIO {
 			if (_readFile.get(1).equals("**ONCE**"))
 				trajectory.set_trajMode(TrajectoryMode.ONCE);
 			else if (_readFile.get(1).equals("**LOOP**"))
-				trajectory.set_trajMode(TrajectoryMode.INFINITE);
+				trajectory.set_trajMode(TrajectoryMode.LOOP);
 
 			for (int i = 2; i < _readFile.size() - 1; i++) {
 				DriveCommand dc = getDriveCommandFromString(_readFile.get(i));
@@ -41,15 +41,18 @@ public final class RobotIO {
 		return null;
 	}
 
-	public static boolean writeTrajFile(String[] p_content, String p_filepath) {
+	public static boolean writeTrajFile(TrajectoryMode p_mode,String[] p_commands, String p_filepath) {
 
 		boolean written = false;
 
 		try {
 			PrintWriter pw = new PrintWriter(new File(p_filepath));
-			for (int i = 0; i < p_content.length; i++) {
-				pw.write(p_content[i]);
+			pw.write("--BEGIN--\n");
+			pw.write("**" + p_mode.toString() + "**");
+			for (int i = 0; i < p_commands.length; i++) {
+				pw.write(p_commands[i] + "\n");
 			}
+			pw.write("--END--");
 			pw.close();
 			written = true;
 		} catch (FileNotFoundException e) {
