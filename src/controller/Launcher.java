@@ -1,6 +1,6 @@
 package controller;
 
-import view.RobotClientUI_V2;
+import view.RobotClientUI;
 
 public class Launcher {
 
@@ -27,7 +27,7 @@ public class Launcher {
 		//System.setProperty("jansi.passthrough", "true");
 		//System.out.println(ANSI_RED_BACKGROUND + ANSI_YELLOW + "This text is red!" + ANSI_RESET + ANSI_RESET);
 		if (args.length == 0) {
-			RobotClientUI_V2 rc = new RobotClientUI_V2();
+			RobotClientUI rc = new RobotClientUI();
 			rc.setVisible(true);
 		}
 		else {

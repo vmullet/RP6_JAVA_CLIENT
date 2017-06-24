@@ -1,4 +1,4 @@
-package view;
+package model;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;

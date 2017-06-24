@@ -41,12 +41,13 @@ public final class RobotIO {
 		return null;
 	}
 
-	public static boolean writeTrajFile(RobotTrajectory p_trajectory, String p_filepath) {
-
-		boolean written = false;
+	public static String writeTrajFile(RobotTrajectory p_trajectory, String p_filepath) {
 
 		try {
-			PrintWriter pw = new PrintWriter(new File(p_filepath));
+			if (!p_filepath.endsWith(".traj")) {
+				p_filepath += ".traj";
+			}
+			PrintWriter pw = new PrintWriter(new File(p_filepath + ".traj"));
 			pw.write("--BEGIN--\n");
 			pw.write("**" + p_trajectory.get_trajMode().toString() + "**\n");
 			for (int i = 0; i < p_trajectory.getCommandsListSize(); i++) {
@@ -54,14 +55,13 @@ public final class RobotIO {
 			}
 			pw.write("--END--");
 			pw.close();
-			written = true;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			written = false;
 			e.printStackTrace();
+			return null;
 		}
 
-		return written;
+		return p_filepath;
 	}
 
 	public static boolean isTrajFileValid(String p_filepath) {

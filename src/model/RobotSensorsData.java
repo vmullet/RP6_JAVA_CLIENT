@@ -116,53 +116,51 @@ public class RobotSensorsData {
 	
 	public void parseString(String full_data) {
 		String[] parsed = full_data.split("\\|");
-		for (int i = 0 ; i < 15 ; i++) {
+		
+		if (parsed.length == 15 && parsed[0].equals("BEGIN") && parsed[14].equals("END"))
+		for (int i = 1 ; i <= 12 ; i++) {
 			
-			String value = parsed[i].split(":")[1].replace(" ","");
+			String value = parsed[i].replaceAll(".*:","");
 			switch(i) {
-			case 0:
+			case 1:
 				_batteryPower = Integer.parseInt(value,10);
 				break;
-			case 1:
+			case 2:
 				_desiredSpeedLeft = Integer.parseInt(value,10);
 				break;
-			case 2:
+			case 3:
 				_desiredSpeedRight = Integer.parseInt(value,10);
 				break;
-			case 3:
+			case 4:
 				_powerLeft = Integer.parseInt(value,10);
 				break;
-			case 4:
+			case 5:
 				_powerRight = Integer.parseInt(value,10);
 				break;
-			case 5:
+			case 6:
 				_speedLeft = Integer.parseInt(value,10);
 				break;
-			case 6:
+			case 7:
 				_speedRight = Integer.parseInt(value,10);
 				break;
-			case 7:
+			case 8:
 				_motorCurrentLeft = Integer.parseInt(value,10);
 				break;
-			case 8:
+			case 9:
 				_motorCurrentRight = Integer.parseInt(value,10);
 				break;
-			case 9:
+			case 10:
 				_lightSensorLeft = Integer.parseInt(value,10);
 				break;
-			case 10:
+			case 11:
 				_lightSensorRight = Integer.parseInt(value,10);
 				break;
-			case 13:
-				if (value.contains("-")) {
-					value.replaceAll(".*-","");
-				}
+			case 12:
+				value = value.replaceAll("[^\\d.]","");
 				_distanceLeft = Integer.parseInt(value,10);
 				break;
-			case 14:
-				if (value.contains("-")) {
-					value.replaceAll(".*-","");
-				}
+			case 13:
+				value = value.replaceAll("[^\\d.]","");
 				_distanceRight = Integer.parseInt(value,10);
 				break;
 				

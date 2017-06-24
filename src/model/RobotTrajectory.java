@@ -114,6 +114,12 @@ public class RobotTrajectory {
 	public void addDriveCommand(DriveCommand toAdd) {
 		_driveCommands.add(toAdd);
 	}
+	
+	public void editDriveCommand(int index,DriveCommand dc) {
+		_driveCommands.get(index).set_robotDirection(dc.get_robotDirection());
+		_driveCommands.get(index).set_robotSpeed(dc.get_robotSpeed());
+		_driveCommands.get(index).set_commandDuration(dc.get_commandDuration());
+	}
 
 	private void executeCommands() {
 		_currentCommandIndex = 0;
@@ -146,6 +152,7 @@ public class RobotTrajectory {
 		if (_currentCommandIndex > _driveCommands.size() - 1)
 			_currentCommandIndex = 0;
 	}
+	
 
 	private RobotState getStateFromDirection(RobotDirection p_direction) {
 		RobotState state = RobotState.NONE;
