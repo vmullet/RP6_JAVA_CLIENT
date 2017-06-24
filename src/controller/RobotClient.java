@@ -87,6 +87,8 @@ public class RobotClient {
 						_is_connecting = false;
 						
 						String message = "";
+						
+						if (_input != null)
 						while ((message = _input.readLine()) != null) {
 							
 							if (message.contains(" | "))
@@ -111,9 +113,9 @@ public class RobotClient {
 			if (_robotSocket != null) {
 						send("quit");
 						try {
-							_robotSocket.close();
 							_input = null;
 							_output = null;
+							_robotSocket.close();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

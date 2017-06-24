@@ -286,10 +286,12 @@ public class RobotClientUI_V2 extends JFrame {
 		tabAutoControl.add(lbl_preview_traj);
 
 		_btnStartAutoPilot = new JButton("START AUTO PILOT");
+		_btnStartAutoPilot.setEnabled(false);
 		_btnStartAutoPilot.setBounds(823, 92, 159, 164);
 		tabAutoControl.add(_btnStartAutoPilot);
 
 		_btnStopAutoPilot = new JButton("STOP AUTO PILOT");
+		_btnStopAutoPilot.setEnabled(false);
 		_btnStopAutoPilot.setBounds(823, 282, 159, 164);
 		tabAutoControl.add(_btnStopAutoPilot);
 
@@ -845,6 +847,7 @@ public class RobotClientUI_V2 extends JFrame {
 					else {
 						_loadedTrajectory.set_myClient(_myClient);
 						drawTrajOnGrid(_loadedTrajectory);
+						_btnStartAutoPilot.setEnabled(true);
 						writeToLogArea("Fichier traj chargé avec succès (" + selectedPath + ")");
 					}
 
@@ -1025,6 +1028,9 @@ public class RobotClientUI_V2 extends JFrame {
 		Thread t1 = new Thread() {
 			@Override
 			public void run() {
+				
+				BlinkerUI bk = new BlinkerUI(_lblBatteryWarning,new ImageIcon[]{new ImageIcon(IMG_BATTERY_25_PATH),new ImageIcon(IMG_BATTERY_00_PATH)});
+				
 				while (_myClient.get_is_connected()) {
 
 					_txt_distance_left.setText(_myClient.get_data().get_distanceLeft() + "");
@@ -1044,6 +1050,13 @@ public class RobotClientUI_V2 extends JFrame {
 
 					_txt_manual_distance.setText(_myClient.get_data().getTotalDistanceMeter() + "");
 
+					if (_myClient.get_data().getBatteryPercentage() <= 25) {
+						bk.startBlink();
+					}
+					else {
+						if (bk.is_running())
+							bk.stopBlink();
+					}
 					showBatteryState(_myClient.get_data().getBatteryPercentage());
 
 					try {
@@ -1071,9 +1084,7 @@ public class RobotClientUI_V2 extends JFrame {
 		_txt_curr_motor_right.setText("");
 		_txt_light_sensors_left.setText("");
 		_txt_light_sensors_right.setText("");
-
 		_txt_manual_speed.setText("");
-
 		_txt_manual_distance.setText("");
 	}
 
@@ -1117,8 +1128,6 @@ public class RobotClientUI_V2 extends JFrame {
 		else if (batteryValue <= 25 && batteryValue > 0) {
 			ic1 = new ImageIcon(IMG_BATTERY_25_PATH);
 			_lblBatteryWarning.setIcon(new ImageIcon(IMG_WARNING_PATH));
-			if (_stopBatteryBlink)
-				startBlinkBattery();
 		}
 
 		_lblBatteryPercent.setText("(" + batteryValue + "%)");

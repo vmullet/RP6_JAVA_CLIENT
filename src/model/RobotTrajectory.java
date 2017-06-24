@@ -10,11 +10,17 @@ public class RobotTrajectory {
 	private ArrayList<DriveCommand> _driveCommands;
 	private TrajectoryMode _trajMode;
 
+	/* Attribute to manage through outter classes */
 	private Thread drive_thread;
+	private boolean _is_running = false;
+	private boolean _stop = true;
+	private int _currentCommandIndex = -1;
 
 	public RobotTrajectory() {
 		_driveCommands = new ArrayList<DriveCommand>();
 		_trajMode = TrajectoryMode.NONE;
+		_is_running = false;
+		_stop = true;
 	}
 
 	public RobotTrajectory(RobotClient p_client, ArrayList<DriveCommand> p_driveCommands, TrajectoryMode p_mode) {
@@ -46,6 +52,12 @@ public class RobotTrajectory {
 	public DriveCommand getCommandAt(int index) {
 		return _driveCommands.get(index);
 	}
+	
+	
+
+	public boolean is_running() {
+		return _is_running;
+	}
 
 	public int getTotalDuration() {
 		int duration = 0;
@@ -61,7 +73,7 @@ public class RobotTrajectory {
 
 			@Override
 			public void run() {
-
+				
 				switch (_trajMode) {
 				case ONCE:
 					_myClient.set_robotState(RobotState.READY_TO_START);
@@ -71,13 +83,11 @@ public class RobotTrajectory {
 
 				case LOOP:
 					_myClient.set_robotState(RobotState.READY_TO_START);
-					while (_myClient.get_robotState() != RobotState.NONE) {
-						executeCommands();
-					}
-					//_myClient.get_myUI().unSelectCurrentSegment();
+					executeCommands();
 					break;
 
 				case NONE:
+					System.out.println("Le mode de trajectoire n'est pas défini");
 					break;
 
 				default:
@@ -92,7 +102,12 @@ public class RobotTrajectory {
 	}
 
 	public void stopAutoPilot() {
-		_myClient.set_robotState(RobotState.NONE);
+		_stop = true;
+	}
+	
+	public void forceStopAutoPilot() {
+		if (_is_running && !_stop)
+		drive_thread.interrupt();
 	}
 
 	public void addDriveCommand(DriveCommand toAdd) {
@@ -100,25 +115,37 @@ public class RobotTrajectory {
 	}
 
 	private void executeCommands() {
-		int cntCommand = 0;
-		while(cntCommand < _driveCommands.size() && _myClient.get_robotState() != RobotState.NONE) {
+		_currentCommandIndex = 0;
+		_is_running = true;
+		
+		while(!_stop) {
 
-			String full_command = _driveCommands.get(cntCommand).toStringCommand();
+			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommand();
 
-			//_myClient.send(full_command);
+			_myClient.send(full_command);
 
-			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(cntCommand).get_robotDirection()));
-			
-			//_myClient.get_myUI().selectSegment(cntCommand);
+			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(_currentCommandIndex).get_robotDirection()));
 
 			try {
-				Thread.sleep(_driveCommands.get(cntCommand).get_commandDuration() * 1000);
+				Thread.sleep(_driveCommands.get(_currentCommandIndex).get_commandDuration() * 1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			cntCommand++;
+			
+			nextCommand();
+			if (_currentCommandIndex == 0 && _trajMode == TrajectoryMode.ONCE)
+				_stop = true;
+				
+			
 		}
+		_is_running = false;
+	}
+	
+	private void nextCommand() {
+		_currentCommandIndex++;
+		if (_currentCommandIndex > _driveCommands.size() - 1)
+			_currentCommandIndex = 0;
 	}
 
 	private RobotState getStateFromDirection(RobotDirection p_direction) {
