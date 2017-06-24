@@ -41,16 +41,16 @@ public final class RobotIO {
 		return null;
 	}
 
-	public static boolean writeTrajFile(TrajectoryMode p_mode,String[] p_commands, String p_filepath) {
+	public static boolean writeTrajFile(RobotTrajectory p_trajectory, String p_filepath) {
 
 		boolean written = false;
 
 		try {
 			PrintWriter pw = new PrintWriter(new File(p_filepath));
 			pw.write("--BEGIN--\n");
-			pw.write("**" + p_mode.toString() + "**");
-			for (int i = 0; i < p_commands.length; i++) {
-				pw.write(p_commands[i] + "\n");
+			pw.write("**" + p_trajectory.get_trajMode().toString() + "**\n");
+			for (int i = 0; i < p_trajectory.getCommandsListSize(); i++) {
+				pw.write(p_trajectory.getCommandAt(i).toStringTraj() + "\n");
 			}
 			pw.write("--END--");
 			pw.close();

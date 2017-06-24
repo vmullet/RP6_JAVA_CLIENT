@@ -52,6 +52,9 @@ public class RobotTrajectory {
 	}
 	
 	
+	public int get_currentCommandIndex() {
+		return _currentCommandIndex;
+	}
 
 	public boolean is_running() {
 		return !_stop;

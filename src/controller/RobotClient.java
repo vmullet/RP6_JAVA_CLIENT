@@ -25,12 +25,14 @@ public class RobotClient {
 	private RobotSensorsData _data;
 
 	private boolean _is_connecting;
+	private boolean _is_connected = false;
 	
 	static int CONN_PORT = 2000;
 
 	public RobotClient() {
 		_robotState = RobotState.NONE;
 		_data = new RobotSensorsData();
+		_is_connected = false;
 	}
 
 	public String get_robotIP() {
@@ -46,7 +48,7 @@ public class RobotClient {
 	}
 
 	public boolean get_is_connected() {
-		return _robotSocket.isConnected();
+		return _is_connected;
 	}
 
 	public boolean get_is_connecting() {
@@ -79,6 +81,7 @@ public class RobotClient {
 						_robotSocket = new Socket(_robotIP, CONN_PORT);
 						_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
 						_output = new PrintWriter(_robotSocket.getOutputStream(),true);
+						_is_connected = true;
 						Thread.sleep(2000);
 						
 						send("");
@@ -90,14 +93,16 @@ public class RobotClient {
 						
 						if (_input != null)
 						while ((message = _input.readLine()) != null) {
-							
+							//System.out.println(message);
 							if (message.contains(" | "))
 								_data.parseString(message);
 						}
+						_is_connected = false;
 						
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						_is_connecting = false;
+						_is_connected = false;
 						e.printStackTrace();
 					}
 

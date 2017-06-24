@@ -111,14 +111,14 @@ public class RobotSensorsData {
 	public float getTotalDistanceMeter() {
 		if (_distanceLeft == 1.0f)
 			_distanceLeft = 0.0f;
-		return _distanceLeft * 0.25f;
+		return _distanceLeft * 0.25f / 1000;
 	}
 	
 	public void parseString(String full_data) {
-		String[] parsed = full_data.split(" \\|");
+		String[] parsed = full_data.split("\\|");
 		for (int i = 0 ; i < 15 ; i++) {
 			
-			String value = parsed[i].split(":")[1];
+			String value = parsed[i].split(":")[1].replace(" ","");
 			switch(i) {
 			case 0:
 				_batteryPower = Integer.parseInt(value,10);
@@ -154,9 +154,15 @@ public class RobotSensorsData {
 				_lightSensorRight = Integer.parseInt(value,10);
 				break;
 			case 13:
+				if (value.contains("-")) {
+					value.replaceAll(".*-","");
+				}
 				_distanceLeft = Integer.parseInt(value,10);
 				break;
 			case 14:
+				if (value.contains("-")) {
+					value.replaceAll(".*-","");
+				}
 				_distanceRight = Integer.parseInt(value,10);
 				break;
 				
