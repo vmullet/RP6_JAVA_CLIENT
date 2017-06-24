@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 
 import model.DriveCommand;
 import model.RobotDirection;
+import model.RobotSensorsData;
 import model.RobotState;
 
 public class RobotClient {
@@ -20,6 +21,8 @@ public class RobotClient {
 	private PrintWriter _output = null;
 
 	private RobotState _robotState;
+	
+	private RobotSensorsData _data;
 
 	private boolean _is_connecting;
 	
@@ -27,6 +30,7 @@ public class RobotClient {
 
 	public RobotClient() {
 		_robotState = RobotState.NONE;
+		_data = new RobotSensorsData();
 	}
 
 	public String get_robotIP() {
@@ -57,6 +61,12 @@ public class RobotClient {
 	public static int getCONN_PORT() {
 		return CONN_PORT;
 	}
+	
+	
+
+	public RobotSensorsData get_data() {
+		return _data;
+	}
 
 	public void openConnection(String p_robotIP) {
 
@@ -78,7 +88,9 @@ public class RobotClient {
 						
 						String message = "";
 						while ((message = _input.readLine()) != null) {
-							System.out.println(_input.readLine());
+							
+							if (message.contains(" | "))
+								_data.parseString(message);
 						}
 						
 					} catch (Exception e) {

@@ -52,6 +52,11 @@ public class DriveCommand {
 	public String toStringCommand() {
 		return getCommandFromDirection(_robotDirection) + "\n" + _robotSpeed;
 	}
+	
+	@Override
+	public String toString() {
+		return _robotDirection.toString() + "(" + _robotSpeed + ";" + _commandDuration + ")";
+	}
 
 	public static String getCommandFromDirection(RobotDirection p_direction) {
 		String direction = "";

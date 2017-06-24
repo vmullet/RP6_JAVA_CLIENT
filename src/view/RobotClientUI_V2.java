@@ -12,6 +12,7 @@ import controller.RobotClient;
 import controller.RobotIO;
 
 import javax.swing.JTabbedPane;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -37,8 +38,11 @@ import java.awt.event.MouseListener;
 import java.net.URL;
 
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.UIManager;
+import javax.swing.JComboBox;
+import javax.swing.JList;
 
 @SuppressWarnings("serial")
 public class RobotClientUI_V2 extends JFrame {
@@ -73,6 +77,7 @@ public class RobotClientUI_V2 extends JFrame {
 
 	private JLabel _imgConnectionState;
 	private JLabel _imgBatteryState;
+	private JLabel _imgRP6;
 	private JLabel _lblBatteryPercent;
 	private JLabel _lblBatteryWarning;
 
@@ -85,13 +90,12 @@ public class RobotClientUI_V2 extends JFrame {
 	private JButton[] _gridTrajPreview;
 	private int _gridSize;
 	private int _baseStartPoint;
-	private HashMap<Integer,int[]> _segmentMap;
+	private HashMap<Integer, int[]> _segmentMap;
 	private int _selectedSegmentIndex;
 	private RobotTrajectory _loadedTrajectory;
 	private Color _defaultButtonColor;
-	/* - - -  END  - - - */
+	/* - - - END - - - */
 
-	private boolean _stopConnectBlink = true;
 	private boolean _stopBatteryBlink = true;
 
 	private RobotClient _myClient;
@@ -113,13 +117,42 @@ public class RobotClientUI_V2 extends JFrame {
 	static URL IMG_TRAFFIC_LIGHT_RED;
 	static URL IMG_TRAFFIC_LIGHT_YELLOW;
 	static URL IMG_TRAFFIC_LIGHT_GREEN;
-	private JTextField textField;
+
+	static URL IMG_RP6_PATH;
+
+	private JTextField _txt_distance_left;
+	private JTextField _txt_speed_left;
+	private JTextField _txt_desired_speed_left;
+	private JTextField _txt_power_left;
+	private JTextField _txt_curr_motor_left;
+	private JTextField _txt_light_sensors_left;
+	private JTextField _txt_distance_right;
+	private JTextField _txt_speed_right;
+	private JTextField _txt_desired_speed_right;
+	private JTextField _txt_power_right;
+	private JTextField _txt_curr_motor_right;
+	private JTextField _txt_light_sensors_right;
+
+	private JLabel lbl_vitesse_robot;
+	private JTextField _txt_manual_speed;
+	private JLabel lbl_distance_robot_meter;
+	private JTextField _txt_manual_distance;
+	private JTextField _txt_speed_command;
+	
+	private JPanel _gridTrajEditor;
+	private JButton[] _gridTrajEditorBtn;
+	private JComboBox<RobotDirection> _cb_direction_command;
+	private JTextField _txt_duration_command;
+	private JList<DriveCommand> _list_command;
+	private DefaultListModel<DriveCommand> _list_command_model;
+	private JLabel lblCrerUneCommande;
+	private RobotTrajectory _createdTrajectory;
 
 	/**
 	 * Create the frame.
 	 */
 	public RobotClientUI_V2() {
-		
+
 		setTitle("RP6 Robot Client");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1090, 914);
@@ -134,6 +167,7 @@ public class RobotClientUI_V2 extends JFrame {
 
 		JPanel tabManualControl = new JPanel();
 		_tabPane.addTab("Contrôle Manuel", null, tabManualControl, null);
+		_tabPane.setEnabledAt(0, false);
 		tabManualControl.setLayout(null);
 
 		JLabel lbl_robot_status = new JLabel("Statut du robot :");
@@ -198,6 +232,28 @@ public class RobotClientUI_V2 extends JFrame {
 		separator.setBounds(478, 41, 13, 419);
 		tabManualControl.add(separator);
 
+		lbl_vitesse_robot = new JLabel("Vitesse du robot");
+		lbl_vitesse_robot.setBounds(82, 384, 116, 16);
+		tabManualControl.add(lbl_vitesse_robot);
+
+		_txt_manual_speed = new JTextField();
+		_txt_manual_speed.setForeground(Color.BLUE);
+		_txt_manual_speed.setEditable(false);
+		_txt_manual_speed.setBounds(217, 384, 116, 22);
+		tabManualControl.add(_txt_manual_speed);
+		_txt_manual_speed.setColumns(10);
+
+		lbl_distance_robot_meter = new JLabel("Distance parcourue (m)");
+		lbl_distance_robot_meter.setBounds(54, 440, 144, 16);
+		tabManualControl.add(lbl_distance_robot_meter);
+
+		_txt_manual_distance = new JTextField();
+		_txt_manual_distance.setForeground(Color.BLUE);
+		_txt_manual_distance.setEditable(false);
+		_txt_manual_distance.setBounds(217, 437, 116, 22);
+		tabManualControl.add(_txt_manual_distance);
+		_txt_manual_distance.setColumns(10);
+
 		JPanel tabAutoControl = new JPanel();
 		_tabPane.addTab("Contr\u00F4le Automatique", null, tabAutoControl, null);
 		tabAutoControl.setLayout(null);
@@ -224,7 +280,6 @@ public class RobotClientUI_V2 extends JFrame {
 		_gridPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		_gridPanel.setBounds(10, 79, 484, 381);
 		tabAutoControl.add(_gridPanel);
-		
 
 		JLabel lbl_preview_traj = new JLabel("Aper\u00E7u de la trajectoire :");
 		lbl_preview_traj.setBounds(10, 61, 153, 16);
@@ -265,12 +320,147 @@ public class RobotClientUI_V2 extends JFrame {
 		_btnStatusAutoBackRight.setBounds(192, 234, 56, 85);
 		panel.add(_btnStatusAutoBackRight);
 
-		
 		_defaultButtonColor = _btnStatusAutoBackLeft.getBackground();
 
 		JPanel tabMonitoring = new JPanel();
 		_tabPane.addTab("Monitoring", null, tabMonitoring, null);
 		tabMonitoring.setLayout(null);
+
+		JLabel lbl_distance_left = new JLabel("Distance Left");
+		lbl_distance_left.setBounds(18, 53, 83, 16);
+		tabMonitoring.add(lbl_distance_left);
+
+		_txt_distance_left = new JTextField();
+		_txt_distance_left.setForeground(Color.BLUE);
+		_txt_distance_left.setEditable(false);
+		_txt_distance_left.setBounds(113, 50, 116, 22);
+		tabMonitoring.add(_txt_distance_left);
+		_txt_distance_left.setColumns(10);
+
+		_imgRP6 = new JLabel("");
+		_imgRP6.setBounds(510, 13, 472, 434);
+		tabMonitoring.add(_imgRP6);
+
+		JLabel lbl_speed_left = new JLabel("Speed Left");
+		lbl_speed_left.setBounds(34, 123, 67, 16);
+		tabMonitoring.add(lbl_speed_left);
+
+		_txt_speed_left = new JTextField();
+		_txt_speed_left.setForeground(Color.BLUE);
+		_txt_speed_left.setEditable(false);
+		_txt_speed_left.setColumns(10);
+		_txt_speed_left.setBounds(113, 120, 116, 22);
+		tabMonitoring.add(_txt_speed_left);
+
+		JLabel lbl_desired_speed_left = new JLabel("Des. Speed Left");
+		lbl_desired_speed_left.setBounds(12, 185, 90, 33);
+		tabMonitoring.add(lbl_desired_speed_left);
+
+		_txt_desired_speed_left = new JTextField();
+		_txt_desired_speed_left.setForeground(Color.BLUE);
+		_txt_desired_speed_left.setEditable(false);
+		_txt_desired_speed_left.setColumns(10);
+		_txt_desired_speed_left.setBounds(113, 190, 116, 22);
+		tabMonitoring.add(_txt_desired_speed_left);
+
+		JLabel lbl_power_left = new JLabel("Power Left");
+		lbl_power_left.setBounds(28, 263, 73, 16);
+		tabMonitoring.add(lbl_power_left);
+
+		_txt_power_left = new JTextField();
+		_txt_power_left.setForeground(Color.BLUE);
+		_txt_power_left.setEditable(false);
+		_txt_power_left.setColumns(10);
+		_txt_power_left.setBounds(113, 260, 116, 22);
+		tabMonitoring.add(_txt_power_left);
+
+		JLabel lbl_motor_left = new JLabel("Cur.Motor Left");
+		lbl_motor_left.setBounds(12, 333, 89, 16);
+		tabMonitoring.add(lbl_motor_left);
+
+		_txt_curr_motor_left = new JTextField();
+		_txt_curr_motor_left.setForeground(Color.BLUE);
+		_txt_curr_motor_left.setEditable(false);
+		_txt_curr_motor_left.setColumns(10);
+		_txt_curr_motor_left.setBounds(113, 330, 116, 22);
+		tabMonitoring.add(_txt_curr_motor_left);
+
+		JLabel lbl_light_sensors_left = new JLabel("LS Left");
+		lbl_light_sensors_left.setBounds(33, 406, 56, 16);
+		tabMonitoring.add(lbl_light_sensors_left);
+
+		_txt_light_sensors_left = new JTextField();
+		_txt_light_sensors_left.setForeground(Color.BLUE);
+		_txt_light_sensors_left.setEditable(false);
+		_txt_light_sensors_left.setColumns(10);
+		_txt_light_sensors_left.setBounds(113, 403, 116, 22);
+		tabMonitoring.add(_txt_light_sensors_left);
+
+		JLabel lbl_distance_right = new JLabel("Distance Right");
+		lbl_distance_right.setBounds(268, 53, 83, 16);
+		tabMonitoring.add(lbl_distance_right);
+
+		_txt_distance_right = new JTextField();
+		_txt_distance_right.setForeground(Color.BLUE);
+		_txt_distance_right.setEditable(false);
+		_txt_distance_right.setColumns(10);
+		_txt_distance_right.setBounds(363, 50, 116, 22);
+		tabMonitoring.add(_txt_distance_right);
+
+		JLabel lblSpeedRight = new JLabel("Speed Right");
+		lblSpeedRight.setBounds(268, 123, 79, 16);
+		tabMonitoring.add(lblSpeedRight);
+
+		_txt_speed_right = new JTextField();
+		_txt_speed_right.setForeground(Color.BLUE);
+		_txt_speed_right.setEditable(false);
+		_txt_speed_right.setColumns(10);
+		_txt_speed_right.setBounds(363, 120, 116, 22);
+		tabMonitoring.add(_txt_speed_right);
+
+		JLabel lbl_desired_speed_right = new JLabel("Des. Speed Right");
+		lbl_desired_speed_right.setBounds(253, 190, 98, 22);
+		tabMonitoring.add(lbl_desired_speed_right);
+
+		_txt_desired_speed_right = new JTextField();
+		_txt_desired_speed_right.setForeground(Color.BLUE);
+		_txt_desired_speed_right.setEditable(false);
+		_txt_desired_speed_right.setColumns(10);
+		_txt_desired_speed_right.setBounds(363, 190, 116, 22);
+		tabMonitoring.add(_txt_desired_speed_right);
+
+		JLabel lbl_power_right = new JLabel("Power Right");
+		lbl_power_right.setBounds(275, 263, 73, 16);
+		tabMonitoring.add(lbl_power_right);
+
+		_txt_power_right = new JTextField();
+		_txt_power_right.setForeground(Color.BLUE);
+		_txt_power_right.setEditable(false);
+		_txt_power_right.setColumns(10);
+		_txt_power_right.setBounds(363, 260, 116, 22);
+		tabMonitoring.add(_txt_power_right);
+
+		JLabel lbl_motor_right = new JLabel("Curr.Motor Right");
+		lbl_motor_right.setBounds(253, 333, 98, 16);
+		tabMonitoring.add(lbl_motor_right);
+
+		_txt_curr_motor_right = new JTextField();
+		_txt_curr_motor_right.setForeground(Color.BLUE);
+		_txt_curr_motor_right.setEditable(false);
+		_txt_curr_motor_right.setColumns(10);
+		_txt_curr_motor_right.setBounds(363, 330, 116, 22);
+		tabMonitoring.add(_txt_curr_motor_right);
+
+		JLabel lbl_light_sensors_right = new JLabel("LS Right");
+		lbl_light_sensors_right.setBounds(286, 406, 66, 16);
+		tabMonitoring.add(lbl_light_sensors_right);
+
+		_txt_light_sensors_right = new JTextField();
+		_txt_light_sensors_right.setForeground(Color.BLUE);
+		_txt_light_sensors_right.setEditable(false);
+		_txt_light_sensors_right.setColumns(10);
+		_txt_light_sensors_right.setBounds(363, 403, 116, 22);
+		tabMonitoring.add(_txt_light_sensors_right);
 
 		_txtAdrIp = new JTextField();
 		_txtAdrIp.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -303,9 +493,10 @@ public class RobotClientUI_V2 extends JFrame {
 		_contentPane.add(separator_1);
 
 		_txtLogArea = new JTextArea();
+		_txtLogArea.setForeground(Color.WHITE);
 		_txtLogArea.setEditable(false);
 		_txtLogArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		_txtLogArea.setBackground(Color.WHITE);
+		_txtLogArea.setBackground(Color.BLACK);
 		_txtLogArea.setBounds(24, 712, 988, 142);
 		_contentPane.add(_txtLogArea);
 		writeToLogArea("Démarrage de l'application");
@@ -329,25 +520,106 @@ public class RobotClientUI_V2 extends JFrame {
 		_lblBatteryWarning = new JLabel("");
 		_lblBatteryWarning.setBounds(305, 75, 71, 57);
 		_contentPane.add(_lblBatteryWarning);
+
+
+		JPanel tabEditor = new JPanel();
+		_tabPane.addTab("Editeur de trajectoire", null, tabEditor, null);
+		tabEditor.setLayout(null);
+
+		_gridTrajEditor = new JPanel();
+		_gridTrajEditor.setBounds(12, 13, 549, 447);
+		tabEditor.add(_gridTrajEditor);
+		_gridTrajEditor.setLayout(new GridLayout(1, 0, 0, 0));
+
+		JButton btnNewButton = new JButton("RESET");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				_list_command_model.clear();
+				_txt_speed_command.setText("");
+				_txt_duration_command.setText("");
+				_cb_direction_command.setSelectedItem(null);
+			}
+		});
+		btnNewButton.setBounds(728, 395, 254, 65);
+		tabEditor.add(btnNewButton);
+
+		JLabel lbl_command_direction = new JLabel("Direction");
+		lbl_command_direction.setBounds(790, 50, 56, 16);
+		tabEditor.add(lbl_command_direction);
+
+		_cb_direction_command = new JComboBox<RobotDirection>();
+		_cb_direction_command.setBounds(866, 47, 111, 22);
+		tabEditor.add(_cb_direction_command);
 		
-		_segmentMap = new HashMap<Integer,int[]>();
+
+		JLabel lbl_speed_command = new JLabel("Vitesse (entre 1 et 150)");
+		lbl_speed_command.setBounds(718, 122, 136, 16);
+		tabEditor.add(lbl_speed_command);
+
+		JLabel lbl_command_duration = new JLabel("Dur\u00E9e de la commande");
+		lbl_command_duration.setBounds(718, 193, 144, 16);
+		tabEditor.add(lbl_command_duration);
+
+		_txt_speed_command = new JTextField();
+		_txt_speed_command.setBounds(866, 119, 116, 22);
+		tabEditor.add(_txt_speed_command);
+		_txt_speed_command.setColumns(10);
+
+		_txt_duration_command = new JTextField();
+		_txt_duration_command.setColumns(10);
+		_txt_duration_command.setBounds(866, 190, 116, 22);
+		tabEditor.add(_txt_duration_command);
+
+		JButton btnSauvegarderTrajectoire = new JButton("Sauvegarder Trajectoire");
+		btnSauvegarderTrajectoire.setBounds(731, 317, 254, 65);
+		tabEditor.add(btnSauvegarderTrajectoire);
+
+		JButton btnAjouterCommande = new JButton("Ajouter Commande");
+		btnAjouterCommande.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				DriveCommand dc = new DriveCommand((RobotDirection)_cb_direction_command.getSelectedItem(),Integer.parseInt(_txt_speed_command.getText()),Integer.parseInt(_txt_duration_command.getText()));
+				_createdTrajectory.addDriveCommand(dc);
+				_list_command_model.addElement(dc);
+				_list_command.setModel(_list_command_model);
+				
+			}
+		});
+		btnAjouterCommande.setBounds(728, 239, 254, 65);
+		tabEditor.add(btnAjouterCommande);
+
+		_list_command = new JList<DriveCommand>();
+		_list_command.setForeground(Color.WHITE);
+		_list_command.setBackground(Color.BLACK);
+		_list_command.setBounds(573, 13, 125, 447);
+		tabEditor.add(_list_command);
+
+		lblCrerUneCommande = new JLabel("Cr\u00E9er une commande :");
+		lblCrerUneCommande.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblCrerUneCommande.setForeground(Color.BLACK);
+		lblCrerUneCommande.setBackground(Color.BLACK);
+		lblCrerUneCommande.setHorizontalAlignment(SwingConstants.CENTER);
+		lblCrerUneCommande.setBounds(667, 13, 306, 16);
+		tabEditor.add(lblCrerUneCommande);
+
+
+		_segmentMap = new HashMap<Integer, int[]>();
 		_selectedSegmentIndex = -1;
 		_myClient = new RobotClient();
-		
+		_createdTrajectory = new RobotTrajectory();
+		_list_command_model = new DefaultListModel<DriveCommand>();
+
 		_btnDisconnect.setEnabled(false);
-		_tabPane.setEnabledAt(0, false);
 		_tabPane.setEnabledAt(1, false);
 		_tabPane.setEnabledAt(2, false);
 		
-		
 		declareResources();
 		buildUI();
-		
+
 		setIcons();
 		setFocusable(true);
 		requestFocusInWindow();
 	}
-	
+
 	private void declareResources() {
 		IMG_UP_ARROW_PATH = getClass().getResource("/up-arrow.png");
 		IMG_DOWN_ARROW_PATH = getClass().getResource("/down-arrow.png");
@@ -366,22 +638,30 @@ public class RobotClientUI_V2 extends JFrame {
 		IMG_TRAFFIC_LIGHT_RED = getClass().getResource("/traffic-light-red.png");
 		IMG_TRAFFIC_LIGHT_YELLOW = getClass().getResource("/traffic-light-yellow.png");
 		IMG_TRAFFIC_LIGHT_GREEN = getClass().getResource("/traffic-light-green.png");
+
+		IMG_RP6_PATH = getClass().getResource("/rp6.jpg");
 	}
 
 	private void buildUI() {
 
 		buildGrid(11);
+		buildEditor(_gridTrajEditor,11);
 		setMouseListeners(RobotDirection.FORWARD);
 		setMouseListeners(RobotDirection.BACKWARD);
 		setMouseListeners(RobotDirection.LEFT);
 		setMouseListeners(RobotDirection.RIGHT);
 		
+		_cb_direction_command.addItem(RobotDirection.FORWARD);
+		_cb_direction_command.addItem(RobotDirection.BACKWARD);
+		_cb_direction_command.addItem(RobotDirection.LEFT);
+		_cb_direction_command.addItem(RobotDirection.RIGHT);
+
 		addKeyListener();
 
 		setBrowseFileListener();
 		setBtnConnectListener();
 		setBtnDisconnectListener();
-		
+
 		setBtnStartAutoPilotListener();
 		setBtnStopAutoPilotListener();
 
@@ -415,13 +695,16 @@ public class RobotClientUI_V2 extends JFrame {
 			boolean pressed = false;
 
 			@Override
-			public void mouseClicked(MouseEvent e) {}
+			public void mouseClicked(MouseEvent e) {
+			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {}
+			public void mouseEntered(MouseEvent e) {
+			}
 
 			@Override
-			public void mouseExited(MouseEvent e) {}
+			public void mouseExited(MouseEvent e) {
+			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -435,18 +718,18 @@ public class RobotClientUI_V2 extends JFrame {
 
 						while (pressed) {
 							try {
-								_myClient.send(speed+"");
+								_myClient.send(speed + "");
 								Thread.sleep(100);
-								speed+=2;
+								speed += 2;
 
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
-						
+
 					}
-					
+
 				};
 
 				t1.start();
@@ -502,19 +785,21 @@ public class RobotClientUI_V2 extends JFrame {
 								command = "r\n";
 								break;
 							}
-							 _myClient.send(command);
+							_myClient.send(command);
 
 							while (pressed) {
 								try {
-									Thread.sleep(100);
-									speed+=2;
-									
+									Thread.sleep(50);
+									speed += 2;
+
 									_myClient.send(speed + "");
 								} catch (InterruptedException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
+							_myClient.send("stp");
+							speed = 0;
 						}
 					};
 
@@ -527,20 +812,20 @@ public class RobotClientUI_V2 extends JFrame {
 			@Override
 			public void keyReleased(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				_myClient. send("stp");
-				System.out.println("stop");
 				pressed = false;
 				launched = false;
-				speed = 1;
+				System.out.println("stop");
+				speed = 0;
 				requestFocusInWindow();
 			}
 
 			@Override
-			public void keyTyped(KeyEvent arg0) {}});
-		
+			public void keyTyped(KeyEvent arg0) {
+			}
+		});
+
 	}
 
-	
 	private void setBrowseFileListener() {
 		_btnBrowseTrajFile.addActionListener(new ActionListener() {
 
@@ -560,16 +845,16 @@ public class RobotClientUI_V2 extends JFrame {
 					else {
 						_loadedTrajectory.set_myClient(_myClient);
 						drawTrajOnGrid(_loadedTrajectory);
-						writeToLogArea("Fichier traj chargé avec succès (" + selectedPath +  ")");
+						writeToLogArea("Fichier traj chargé avec succès (" + selectedPath + ")");
 					}
-					
+
 				}
 				requestFocusInWindow();
 			}
-			
+
 		});
 	}
-	
+
 	private void setBtnConnectListener() {
 		_btnConnect.addActionListener(new ActionListener() {
 			@Override
@@ -577,23 +862,24 @@ public class RobotClientUI_V2 extends JFrame {
 				// TODO Auto-generated method stub
 				_btnConnect.setEnabled(false);
 				_txtAdrIp.setEnabled(false);
-				BlinkerUI bk = new BlinkerUI(_imgConnectionState,new ImageIcon[]{new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW),new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK)});
+				BlinkerUI bk = new BlinkerUI(_imgConnectionState, new ImageIcon[] {
+						new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW), new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK) });
 				bk.startBlink();
 				writeToLogArea("Connexion en cours vers " + _txtAdrIp.getText() + ":" + RobotClient.getCONN_PORT());
 				_myClient.openConnection(_txtAdrIp.getText());
 				Thread t1 = new Thread() {
 					@Override
 					public void run() {
-						while(_myClient.get_is_connecting()) {
+						while (_myClient.get_is_connecting()) {
 							try {
 								Thread.sleep(500);
-								
+
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
-						
+
 						try {
 							bk.stopBlink();
 							Thread.sleep(200);
@@ -604,27 +890,27 @@ public class RobotClientUI_V2 extends JFrame {
 								_tabPane.setEnabledAt(1, true);
 								_tabPane.setEnabledAt(2, true);
 								writeToLogArea("Connecté au RP6 (" + _txtAdrIp.getText() + ")");
-							}
-							else {
+								displayRobotData();
+							} else {
 								_btnConnect.setEnabled(true);
 								_txtAdrIp.setEnabled(true);
 							}
-							
+
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
+
 					}
-					
+
 				};
 				t1.start();
 				requestFocusInWindow();
 			}
-			
+
 		});
 	}
-	
+
 	private void setBtnDisconnectListener() {
 		_btnDisconnect.addActionListener(new ActionListener() {
 			@Override
@@ -634,7 +920,7 @@ public class RobotClientUI_V2 extends JFrame {
 				Thread t1 = new Thread() {
 					@Override
 					public void run() {
-						while(!_myClient.get_is_connected()) {
+						while (!_myClient.get_is_connected()) {
 							try {
 								Thread.sleep(200);
 							} catch (InterruptedException e) {
@@ -642,7 +928,7 @@ public class RobotClientUI_V2 extends JFrame {
 								e.printStackTrace();
 							}
 						}
-						
+
 						_btnConnect.setEnabled(true);
 						_btnDisconnect.setEnabled(false);
 						_txtAdrIp.setEnabled(true);
@@ -650,17 +936,18 @@ public class RobotClientUI_V2 extends JFrame {
 						_tabPane.setEnabledAt(1, false);
 						_tabPane.setEnabledAt(2, false);
 						_imgConnectionState.setIcon(new ImageIcon(IMG_TRAFFIC_LIGHT_RED));
+						resetRobotData();
 						writeToLogArea("Déconnexion effectuée avec succès");
 						requestFocusInWindow();
 					}
 				};
-				
+
 				t1.start();
 			}
-			
+
 		});
 	}
-	
+
 	private void setBtnStartAutoPilotListener() {
 		_btnStartAutoPilot.addActionListener(new ActionListener() {
 			@Override
@@ -668,10 +955,10 @@ public class RobotClientUI_V2 extends JFrame {
 				// TODO Auto-generated method stub
 				_loadedTrajectory.startAutoPilot();
 			}
-			
+
 		});
 	}
-	
+
 	private void setBtnStopAutoPilotListener() {
 		_btnStopAutoPilot.addActionListener(new ActionListener() {
 			@Override
@@ -679,10 +966,9 @@ public class RobotClientUI_V2 extends JFrame {
 				// TODO Auto-generated method stub
 				_loadedTrajectory.stopAutoPilot();
 			}
-			
+
 		});
 	}
-	
 
 	private void setIcons() {
 		_btnMoveUpward.setIcon(new ImageIcon(IMG_UP_ARROW_PATH));
@@ -691,42 +977,77 @@ public class RobotClientUI_V2 extends JFrame {
 		_btnTurnRight.setIcon(new ImageIcon(IMG_RIGHT_ARROW_PATH));
 
 		_imgConnectionState.setIcon(new ImageIcon(IMG_TRAFFIC_LIGHT_RED));
+		_imgRP6.setIcon(new ImageIcon(IMG_RP6_PATH));
 	}
-	
 
 	private void setStartPointButton(int size) {
-		_baseStartPoint = (size/2 + 1) * (size - 1);
-		_gridTrajPreview[_baseStartPoint].setBackground(new Color(255,0,0));
-		setGridButtonText(_baseStartPoint,"R");
+		_baseStartPoint = (size / 2 + 1) * (size - 1);
+		_gridTrajPreview[_baseStartPoint].setBackground(new Color(255, 0, 0));
+		setGridButtonText(_baseStartPoint, "R");
 	}
 	
+	private void setStartPointButtonEditor(int size) {
+		_baseStartPoint = (size / 2 + 1) * (size - 1);
+		_gridTrajEditorBtn[_baseStartPoint].setBackground(new Color(255, 0, 0));
+		setGridEditorButtonText(_baseStartPoint, "R");
+	}
+
 	private void buildGrid(int size) {
 		_gridSize = size;
 		_gridTrajPreview = new JButton[size * size];
 		_gridPanel.setLayout(new GridLayout(size, size, 0, 0));
-		for (int i = 0 ; i < size * size ; i++) {
-			
+		for (int i = 0; i < size * size; i++) {
+
 			JButton _gridBtn = new JButton("");
 			_gridPanel.add(_gridBtn);
 			_gridTrajPreview[i] = _gridBtn;
-			
+
 		}
 		setStartPointButton(size);
 	}
+	
+	private void buildEditor(JPanel _grid,int size) {
+		_gridSize = size;
+		_gridTrajEditorBtn = new JButton[size * size];
+		_grid.setLayout(new GridLayout(size, size, 0, 0));
+		for (int i = 0; i < size * size; i++) {
 
-	private void startBlinkConnectImg() {
-		_stopConnectBlink = false;
-		ImageIcon ic1 = new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW);
-		ImageIcon ic2 = new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK);
+			JButton _gridBtn = new JButton("");
+			_grid.add(_gridBtn);
+			_gridTrajEditorBtn[i] = _gridBtn;
+
+		}
+		setStartPointButtonEditor(size);
+	}
+
+
+	private void displayRobotData() {
 		Thread t1 = new Thread() {
 			@Override
 			public void run() {
-				while (!_stopConnectBlink) {
-					_imgConnectionState.setIcon(ic1);
+				while (_myClient.get_is_connected()) {
+
+					_txt_distance_left.setText(_myClient.get_data().get_distanceLeft() + "");
+					_txt_distance_right.setText(_myClient.get_data().get_distanceRight() + "");
+					_txt_speed_left.setText(_myClient.get_data().get_speedLeft() + "");
+					_txt_speed_right.setText(_myClient.get_data().get_speedRight() + "");
+					_txt_desired_speed_left.setText(_myClient.get_data().get_desiredSpeedLeft() + "");
+					_txt_desired_speed_right.setText(_myClient.get_data().get_desiredSpeedRight() + "");
+					_txt_power_left.setText(_myClient.get_data().get_powerLeft() + "");
+					_txt_power_right.setText(_myClient.get_data().get_powerRight() + "");
+					_txt_curr_motor_left.setText(_myClient.get_data().get_motorCurrentLeft() + "");
+					_txt_curr_motor_right.setText(_myClient.get_data().get_motorCurrentRight() + "");
+					_txt_light_sensors_left.setText(_myClient.get_data().get_lightSensorLeft() + "");
+					_txt_light_sensors_right.setText(_myClient.get_data().get_lightSensorRight() + "");
+
+					_txt_manual_speed.setText(_myClient.get_data().getSpeedPerSecond() + " cm/s");
+
+					_txt_manual_distance.setText(_myClient.get_data().getTotalDistanceMeter() + "");
+
+					showBatteryState(_myClient.get_data().getBatteryPercentage());
+
 					try {
-						Thread.sleep(500);
-						_imgConnectionState.setIcon(ic2);
-						Thread.sleep(500);
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -735,6 +1056,25 @@ public class RobotClientUI_V2 extends JFrame {
 			}
 		};
 		t1.start();
+	}
+
+	private void resetRobotData() {
+		_txt_distance_left.setText("");
+		_txt_distance_right.setText("");
+		_txt_speed_left.setText("");
+		_txt_speed_right.setText("");
+		_txt_desired_speed_left.setText("");
+		_txt_desired_speed_right.setText("");
+		_txt_power_left.setText("");
+		_txt_power_right.setText("");
+		_txt_curr_motor_left.setText("");
+		_txt_curr_motor_right.setText("");
+		_txt_light_sensors_left.setText("");
+		_txt_light_sensors_right.setText("");
+
+		_txt_manual_speed.setText("");
+
+		_txt_manual_distance.setText("");
 	}
 
 	private void startBlinkBattery() {
@@ -789,106 +1129,114 @@ public class RobotClientUI_V2 extends JFrame {
 		_txtLogArea.setText(_txtLogArea.getText() + "[" + new Date() + "] : " + message + "\n");
 	}
 
-
-	private void setGridButtonText(int index,String text) {
+	private void setGridButtonText(int index, String text) {
 		_gridTrajPreview[index].setForeground(Color.WHITE);
 		_gridTrajPreview[index].setFont(new Font("Arial", Font.PLAIN, 12));
 		_gridTrajPreview[index].setText(text);
 	}
 	
+	private void setGridEditorButtonText(int index, String text) {
+		_gridTrajEditorBtn[index].setForeground(Color.WHITE);
+		_gridTrajEditorBtn[index].setFont(new Font("Arial", Font.PLAIN, 12));
+		_gridTrajEditorBtn[index].setText(text);
+	}
 
 	public void drawTrajOnGrid(RobotTrajectory rt) {
 		int arrival = _baseStartPoint; // Point de départ
 		int[] indexList = null;
-		for (int i = 0 ; i < rt.getCommandsListSize() ; i++) {
-			
+		for (int i = 0; i < rt.getCommandsListSize(); i++) {
+
 			DriveCommand dc = rt.getCommandAt(i);
 			indexList = selectGridNeighBoorButtons(2, dc.get_robotDirection(), arrival, dc.get_robotSpeed() + "");
-			_segmentMap.put(i,indexList); // Ajout des points du segment à la hashmap (l'index du segment est l'index de la commande)
-			arrival = indexList[indexList.length - 1]; // Dernier point du segment dessiné (point de départ du prochain)
+			_segmentMap.put(i, indexList); // Ajout des points du segment à la
+											// hashmap (l'index du segment est
+											// l'index de la commande)
+			arrival = indexList[indexList.length - 1]; // Dernier point du
+														// segment dessiné
+														// (point de départ du
+														// prochain)
 		}
 	}
-	
-	private void selectButton(int index,Color color) {
+
+	private void selectButton(int index, Color color) {
 		_gridTrajPreview[index].setBackground(color);
 	}
-
 
 	private void unSelectButton(int index) {
 		_gridTrajPreview[index].setBackground(_defaultButtonColor);
 	}
-	
+
 	private void selectTrajButton(int index) {
 		if (index != _baseStartPoint)
 			_gridTrajPreview[index].setBackground(Color.GREEN);
 	}
-	
+
 	private void unSelectTrajButton(int index) {
 		if (index != _baseStartPoint)
 			_gridTrajPreview[index].setBackground(Color.BLACK);
 		else
 			_gridTrajPreview[index].setBackground(Color.RED);
 	}
-	
-	private int[] selectGridNeighBoorButtons(int nbButtons,RobotDirection direction,int actual,String text) {
+
+	private int[] selectGridNeighBoorButtons(int nbButtons, RobotDirection direction, int actual, String text) {
 		int lastIndex = -1;
 		int[] indexList = new int[nbButtons];
-		
-		switch(direction) {
-			case FORWARD:
-				for (int i = 0 ; i < nbButtons; i++) {
-					lastIndex = actual - _gridSize * (i+1);
-					if (lastIndex != _baseStartPoint) {
-						selectButton(lastIndex,Color.BLACK);
-						setGridButtonText(lastIndex,text);
-					}
-					indexList[i] = lastIndex;
-					
+
+		switch (direction) {
+		case FORWARD:
+			for (int i = 0; i < nbButtons; i++) {
+				lastIndex = actual - _gridSize * (i + 1);
+				if (lastIndex != _baseStartPoint) {
+					selectButton(lastIndex, Color.BLACK);
+					setGridButtonText(lastIndex, text);
 				}
-				break;
-			
-			case BACKWARD:
-				for (int i = 0 ; i < nbButtons; i++) {
-					lastIndex = actual + _gridSize * (i+1);
-					if (lastIndex != _baseStartPoint) {
-						selectButton(lastIndex,Color.BLACK);
-						setGridButtonText(lastIndex,text);
-					}
-					indexList[i] = lastIndex;
-					
+				indexList[i] = lastIndex;
+
+			}
+			break;
+
+		case BACKWARD:
+			for (int i = 0; i < nbButtons; i++) {
+				lastIndex = actual + _gridSize * (i + 1);
+				if (lastIndex != _baseStartPoint) {
+					selectButton(lastIndex, Color.BLACK);
+					setGridButtonText(lastIndex, text);
 				}
-				break;
-				
-			case LEFT:
-				for (int i = 0 ; i < nbButtons; i++) {
-					lastIndex = actual - (i+1);
-					if (lastIndex != _baseStartPoint) {
-						selectButton(lastIndex,Color.BLACK);
-						setGridButtonText(lastIndex,text);
-					}
-					indexList[i] = lastIndex;
-					
+				indexList[i] = lastIndex;
+
+			}
+			break;
+
+		case LEFT:
+			for (int i = 0; i < nbButtons; i++) {
+				lastIndex = actual - (i + 1);
+				if (lastIndex != _baseStartPoint) {
+					selectButton(lastIndex, Color.BLACK);
+					setGridButtonText(lastIndex, text);
 				}
-				break;
-				
-			case RIGHT:
-				for (int i = 0 ; i < nbButtons; i++) {
-					lastIndex = actual + (i+1);
-					if (lastIndex != _baseStartPoint) {
-						selectButton(lastIndex,Color.BLACK);
-						setGridButtonText(lastIndex,text);
-					}
-					indexList[i] = lastIndex;
-					
+				indexList[i] = lastIndex;
+
+			}
+			break;
+
+		case RIGHT:
+			for (int i = 0; i < nbButtons; i++) {
+				lastIndex = actual + (i + 1);
+				if (lastIndex != _baseStartPoint) {
+					selectButton(lastIndex, Color.BLACK);
+					setGridButtonText(lastIndex, text);
 				}
-				break;
-				
-			case NONE:
-				break;
-				
-			default:
-				break;
-			
+				indexList[i] = lastIndex;
+
+			}
+			break;
+
+		case NONE:
+			break;
+
+		default:
+			break;
+
 		}
 		return indexList;
 	}
@@ -896,35 +1244,35 @@ public class RobotClientUI_V2 extends JFrame {
 	private void selectSegment(int index) {
 		if (_selectedSegmentIndex != -1)
 			unSelectSegment(_selectedSegmentIndex);
-		
+
 		_selectedSegmentIndex = index;
 		int[] btnIndexes = _segmentMap.get(index);
-		for (int i = 0 ; i < btnIndexes.length ; i++) {
+		for (int i = 0; i < btnIndexes.length; i++) {
 			selectTrajButton(btnIndexes[i]);
 		}
-		
+
 	}
-	
+
 	private void unSelectSegment(int index) {
-		
+
 		int[] btnIndexes = _segmentMap.get(index);
-		for (int i = 0 ; i < btnIndexes.length ; i++) {
+		for (int i = 0; i < btnIndexes.length; i++) {
 			unSelectTrajButton(btnIndexes[i]);
 		}
-		
+
 	}
-	
+
 	private void unSelectCurrentSegment() {
-		
+
 		int[] btnIndexes = _segmentMap.get(_selectedSegmentIndex);
-		for (int i = 0 ; i < btnIndexes.length ; i++) {
+		for (int i = 0; i < btnIndexes.length; i++) {
 			unSelectTrajButton(btnIndexes[i]);
 		}
-		
+
 	}
-	
+
 	private void resetGrid() {
-		for (int i = 0 ; i < _gridTrajPreview.length ; i++) {
+		for (int i = 0; i < _gridTrajPreview.length; i++) {
 			unSelectButton(i);
 			_gridTrajPreview[i].setText("");
 		}
