@@ -12,14 +12,12 @@ public class RobotTrajectory {
 
 	/* Attribute to manage through outter classes */
 	private Thread drive_thread;
-	private boolean _is_running = false;
 	private boolean _stop = true;
 	private int _currentCommandIndex = -1;
 
 	public RobotTrajectory() {
 		_driveCommands = new ArrayList<DriveCommand>();
 		_trajMode = TrajectoryMode.NONE;
-		_is_running = false;
 		_stop = true;
 	}
 
@@ -56,7 +54,7 @@ public class RobotTrajectory {
 	
 
 	public boolean is_running() {
-		return _is_running;
+		return !_stop;
 	}
 
 	public int getTotalDuration() {
@@ -106,7 +104,7 @@ public class RobotTrajectory {
 	}
 	
 	public void forceStopAutoPilot() {
-		if (_is_running && !_stop)
+		if (!_stop)
 		drive_thread.interrupt();
 	}
 
@@ -116,8 +114,7 @@ public class RobotTrajectory {
 
 	private void executeCommands() {
 		_currentCommandIndex = 0;
-		_is_running = true;
-		
+		_stop = false;
 		while(!_stop) {
 
 			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommand();
@@ -139,7 +136,6 @@ public class RobotTrajectory {
 				
 			
 		}
-		_is_running = false;
 	}
 	
 	private void nextCommand() {
