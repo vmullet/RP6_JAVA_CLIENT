@@ -25,6 +25,7 @@ public class RobotClient {
 	private RobotSensorsData _data;
 
 	private boolean _is_connecting;
+	private boolean _is_connected = false;
 	
 	static int CONN_PORT = 2000;
 
@@ -46,7 +47,7 @@ public class RobotClient {
 	}
 
 	public boolean is_connected() {
-		return _robotSocket.isConnected() && !_robotSocket.isClosed();
+		return _is_connected;
 	}
 
 	public boolean is_connecting() {
@@ -85,6 +86,7 @@ public class RobotClient {
 						send("cmd");
 						
 						_is_connecting = false;
+						_is_connected = true;
 						
 						String message = "";
 						
@@ -92,10 +94,13 @@ public class RobotClient {
 								_data.parseString(message);
 							
 						}
+						
+						
 							
 					}catch (Exception e) {
 						// TODO Auto-generated catch block
 						_is_connecting = false;
+						_is_connected = false;
 						e.printStackTrace();
 					}
 

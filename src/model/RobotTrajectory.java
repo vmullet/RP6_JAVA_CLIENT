@@ -128,7 +128,7 @@ public class RobotTrajectory {
 
 			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommand();
 
-			_myClient.send(full_command);
+			//_myClient.send(full_command);
 
 			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(_currentCommandIndex).get_robotDirection()));
 
@@ -140,7 +140,8 @@ public class RobotTrajectory {
 			}
 			
 			nextCommand();
-			if (_currentCommandIndex == 0 && _trajMode == TrajectoryMode.ONCE)
+			System.out.println(_currentCommandIndex);
+			if (_currentCommandIndex == _driveCommands.size() - 1 && _trajMode == TrajectoryMode.ONCE)
 				_stop = true;
 				
 			
@@ -148,9 +149,10 @@ public class RobotTrajectory {
 	}
 	
 	private void nextCommand() {
-		_currentCommandIndex++;
-		if (_currentCommandIndex > _driveCommands.size() - 1)
+		if (_currentCommandIndex + 1 >= _driveCommands.size())
 			_currentCommandIndex = 0;
+		else
+			_currentCommandIndex++;
 	}
 	
 

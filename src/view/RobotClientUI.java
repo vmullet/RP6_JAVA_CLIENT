@@ -298,7 +298,7 @@ public class RobotClientUI extends JFrame {
 
 		_previewGridPanel = new JPanel();
 		_previewGridPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		_previewGridPanel.setBounds(10, 79, 484, 381);
+		_previewGridPanel.setBounds(10, 79, 528, 381);
 		tabAutoControl.add(_previewGridPanel);
 
 		JLabel lbl_preview_traj = new JLabel("Aper\u00E7u de la trajectoire :");
@@ -307,39 +307,39 @@ public class RobotClientUI extends JFrame {
 
 		_btnStartAutoPilot = new JButton("START AUTO PILOT");
 		_btnStartAutoPilot.setEnabled(false);
-		_btnStartAutoPilot.setBounds(823, 92, 159, 164);
+		_btnStartAutoPilot.setBounds(835, 92, 147, 164);
 		tabAutoControl.add(_btnStartAutoPilot);
 
 		_btnStopAutoPilot = new JButton("STOP AUTO PILOT");
 		_btnStopAutoPilot.setEnabled(false);
-		_btnStopAutoPilot.setBounds(823, 282, 159, 164);
+		_btnStopAutoPilot.setBounds(835, 282, 147, 164);
 		tabAutoControl.add(_btnStopAutoPilot);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel.setLayout(null);
-		panel.setBounds(507, 92, 304, 354);
+		panel.setBounds(550, 92, 273, 354);
 		tabAutoControl.add(panel);
 
 		_btnStatusAutoUpLeft = new JButton("");
 		_btnStatusAutoUpLeft.setBackground(UIManager.getColor("Button.background"));
-		_btnStatusAutoUpLeft.setBounds(52, 36, 56, 85);
+		_btnStatusAutoUpLeft.setBounds(38, 36, 56, 85);
 		panel.add(_btnStatusAutoUpLeft);
 
 		_btnStatusAutoBackLeft = new JButton("");
-		_btnStatusAutoBackLeft.setBounds(52, 234, 56, 85);
+		_btnStatusAutoBackLeft.setBounds(38, 234, 56, 85);
 		panel.add(_btnStatusAutoBackLeft);
 
 		_btnStatusAutoMiddle = new JButton("");
-		_btnStatusAutoMiddle.setBounds(107, 136, 85, 85);
+		_btnStatusAutoMiddle.setBounds(93, 136, 85, 85);
 		panel.add(_btnStatusAutoMiddle);
 
 		_btnStatusAutoUpRight = new JButton("");
-		_btnStatusAutoUpRight.setBounds(192, 36, 56, 85);
+		_btnStatusAutoUpRight.setBounds(178, 36, 56, 85);
 		panel.add(_btnStatusAutoUpRight);
 
 		_btnStatusAutoBackRight = new JButton("");
-		_btnStatusAutoBackRight.setBounds(192, 234, 56, 85);
+		_btnStatusAutoBackRight.setBounds(178, 234, 56, 85);
 		panel.add(_btnStatusAutoBackRight);
 
 		_previewDefaultButtonColor = _btnStatusAutoBackLeft.getBackground();
@@ -601,7 +601,7 @@ public class RobotClientUI extends JFrame {
 						fc.setDialogTitle("Choississez un chemin de destination");
 						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 						fc.setDialogType(JFileChooser.SAVE_DIALOG);
-						//fc.setFileFilter(new FileNameExtensionFilter("Fichier traj","traj"));
+						fc.setFileFilter(new FileNameExtensionFilter("Fichier traj","traj"));
 						
 						int returned = fc.showSaveDialog(_btnSaveTrajFile);
 						if (returned == JFileChooser.APPROVE_OPTION) {
@@ -696,6 +696,7 @@ public class RobotClientUI extends JFrame {
 		_cb_trajectory_mode.setBounds(884, 11, 98, 22);
 		_cb_trajectory_mode.addItem(TrajectoryMode.ONCE);
 		_cb_trajectory_mode.addItem(TrajectoryMode.LOOP);
+		
 		_cb_trajectory_mode.addActionListener(new ActionListener() {
 			
 			@Override
@@ -717,6 +718,7 @@ public class RobotClientUI extends JFrame {
 		_myClient = new RobotClient();
 		
 		_editorTrajectory = new RobotTrajectory();
+		_editorTrajectory.set_trajMode(TrajectoryMode.ONCE);
 		_list_command_model = new DefaultListModel<DriveCommand>();
 		_editorSegmentMap = new HashMap<Integer,int[]>();
 		_editorSelectedSegmentIndex = -1;
@@ -932,7 +934,7 @@ public class RobotClientUI extends JFrame {
 
 	private void setPreviewGridButtonText(int index, String text) {
 		_previewBtns[index].setForeground(Color.WHITE);
-		_previewBtns[index].setFont(new Font("Arial", Font.PLAIN, 12));
+		_previewBtns[index].setFont(new Font("Arial", Font.PLAIN, 10));
 		_previewBtns[index].setText(text);
 	}
 
@@ -1048,23 +1050,35 @@ public class RobotClientUI extends JFrame {
 	}
 
 	private void selectPreviewSegment(int index) {
-		if (_previewSelectedSegmentIndex != -1)
-			unSelectPreviewSegment(_previewSelectedSegmentIndex);
-
-		_previewSelectedSegmentIndex = index;
-		int[] btnIndexes = _previewSegmentMap.get(index);
-		for (int i = 0; i < btnIndexes.length; i++) {
-			selectPreviewTrajButton(btnIndexes[i]);
+		if (_previewSelectedSegmentIndex == -1) {
+			_previewSelectedSegmentIndex = index;
+			int[] btnIndexes = _previewSegmentMap.get(index);
+			for (int i = 0; i < btnIndexes.length; i++) {
+				selectPreviewTrajButton(btnIndexes[i]);
+			}
 		}
-
+		else {
+			if (_previewSelectedSegmentIndex != index) {
+				unSelectPreviewSegment(_previewSelectedSegmentIndex);
+				_previewSelectedSegmentIndex = index;
+				int[] btnIndexes = _previewSegmentMap.get(index);
+				for (int i = 0; i < btnIndexes.length; i++) {
+					selectPreviewTrajButton(btnIndexes[i]);
+				}
+			}
+		}
+			
 	}
 
 	private void unSelectPreviewSegment(int index) {
 
-		int[] btnIndexes = _previewSegmentMap.get(index);
-		for (int i = 0; i < btnIndexes.length; i++) {
-			unSelectPreviewTrajButton(btnIndexes[i]);
+		if (index != -1) {
+			int[] btnIndexes = _previewSegmentMap.get(index);
+			for (int i = 0; i < btnIndexes.length; i++) {
+				unSelectPreviewTrajButton(btnIndexes[i]);
+			}
 		}
+		
 
 	}
 
@@ -1426,6 +1440,8 @@ public class RobotClientUI extends JFrame {
 						JOptionPane.showMessageDialog(null, "Le fichier .traj n'est pas valide");
 					else {
 						_previewLoadedTrajectory.set_myClient(_myClient);
+						resetPreviewGrid();
+						_previewSegmentMap.clear();
 						drawTrajOnPreviewGrid(_previewLoadedTrajectory);
 						_btnStartAutoPilot.setEnabled(true);
 						writeToLogArea("Fichier traj chargé avec succès (" + selectedPath + ")");
@@ -1536,12 +1552,24 @@ public class RobotClientUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				_btnStartAutoPilot.setEnabled(false);
+				_btnStopAutoPilot.setEnabled(true);
 				_previewLoadedTrajectory.startAutoPilot();
+				writeToLogArea("Démarrage de l'autopilote");
 				Thread t1 = new Thread() {
 					@Override
 					public void run() {
-						while (_previewLoadedTrajectory.is_running())
+						
+						while (_previewLoadedTrajectory.is_running()) {
 							selectPreviewSegment(_previewLoadedTrajectory.get_currentCommandIndex());
+							try {
+								Thread.sleep(50);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+							
 					}
 				};
 
@@ -1557,6 +1585,9 @@ public class RobotClientUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				_previewLoadedTrajectory.stopAutoPilot();
+				_btnStartAutoPilot.setEnabled(true);
+				_btnStopAutoPilot.setEnabled(false);
+				writeToLogArea("Arrêt de l'autopilote");
 			}
 
 		});

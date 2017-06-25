@@ -47,7 +47,7 @@ public final class RobotIO {
 			if (!p_filepath.endsWith(".traj")) {
 				p_filepath += ".traj";
 			}
-			PrintWriter pw = new PrintWriter(new File(p_filepath + ".traj"));
+			PrintWriter pw = new PrintWriter(new File(p_filepath));
 			pw.write("--BEGIN--\n");
 			pw.write("**" + p_trajectory.get_trajMode().toString() + "**\n");
 			for (int i = 0; i < p_trajectory.getCommandsListSize(); i++) {
@@ -70,7 +70,7 @@ public final class RobotIO {
 		if (_readFile.get(0).equals("--BEGIN--") && _readFile.get(_readFile.size() - 1).equals("--END--")
 				&& (_readFile.get(1).equals("**ONCE**") || _readFile.get(1).equals("**LOOP**"))) {
 			for (int i = 2; i < _readFile.size() - 1; i++) {
-				if (!_readFile.get(i).matches("[f|b|l|r][{][0-9]{1,1}[}][-][>][0-9]+"))
+				if (!_readFile.get(i).matches("[f|b|l|r][{][0-9]{1,3}[}][-][>][0-9]+"))
 					return false;
 			}
 		} else {
@@ -86,6 +86,7 @@ public final class RobotIO {
 
 			String currentLine = "";
 			while ((currentLine = br.readLine()) != null) {
+				System.out.println(currentLine);
 				_readFile.add(currentLine);
 			}
 
@@ -97,7 +98,7 @@ public final class RobotIO {
 
 	private static DriveCommand getDriveCommandFromString(String instruction) {
 
-		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,1})[}][-][>]([0-9]+)");
+		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,3})[}][-][>]([0-9]+)");
 		Matcher m = p.matcher(instruction);
 		boolean b = m.matches();
 		DriveCommand dc = new DriveCommand(m.group(1), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
