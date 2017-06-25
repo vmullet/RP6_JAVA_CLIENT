@@ -631,7 +631,7 @@ public class RobotClientUI extends JFrame {
 		JButton btnAjouterCommande = new JButton("Ajouter Commande");
 		btnAjouterCommande.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (ModifyCommand.checkValues(_cb_direction_command, _txt_speed_command, _txt_duration_command)) {
+				if (PopupCommandEditor.checkValues(_cb_direction_command, _txt_speed_command, _txt_duration_command)) {
 					DriveCommand dc = new DriveCommand((RobotDirection) _cb_direction_command.getSelectedItem(),
 							Integer.parseInt(_txt_speed_command.getText()),
 							Integer.parseInt(_txt_duration_command.getText()));
@@ -674,7 +674,7 @@ public class RobotClientUI extends JFrame {
 				if (evt.getClickCount() == 2) {
 					RobotClientUI parent = (RobotClientUI) SwingUtilities.getRoot(evt.getComponent());
 					int selected = _list_command.getSelectedIndex();
-					ModifyCommand popup = new ModifyCommand(parent, selected);
+					PopupCommandEditor popup = new PopupCommandEditor(parent, selected);
 					popup.showUI(true);
 
 				}

@@ -21,7 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
-public class ModifyCommand extends JDialog {
+public class PopupCommandEditor extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JComboBox<RobotDirection> _cb_robot_direction;
@@ -32,7 +32,7 @@ public class ModifyCommand extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ModifyCommand(RobotClientUI parent, int commandIndex) {
+	public PopupCommandEditor(RobotClientUI parent, int commandIndex) {
 		setTitle("Edit Command n\u00B0 " + commandIndex);
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
