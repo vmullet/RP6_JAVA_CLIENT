@@ -1588,6 +1588,7 @@ public class RobotClientUI extends JFrame {
 				_btnStartAutoPilot.setEnabled(true);
 				_btnStopAutoPilot.setEnabled(false);
 				writeToLogArea("Arrêt de l'autopilote");
+				requestFocusInWindow();
 			}
 
 		});
