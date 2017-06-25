@@ -101,7 +101,11 @@ public final class RobotIO {
 		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,3})[}][-][>]([0-9]+)");
 		Matcher m = p.matcher(instruction);
 		boolean b = m.matches();
-		DriveCommand dc = new DriveCommand(m.group(1), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
+		DriveCommand dc = null;
+		if (b) {
+			dc = new DriveCommand(m.group(1), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
+		}
+		
 
 		return dc;
 	}

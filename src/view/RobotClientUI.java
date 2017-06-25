@@ -3,7 +3,6 @@ package view;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.MaskFormatter;
 
 import model.BlinkerUI;
 import model.DriveCommand;
@@ -21,7 +20,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -30,7 +28,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.JTextArea;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -43,14 +40,12 @@ import java.awt.event.MouseListener;
 import java.net.URL;
 
 import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JList;
 
 @SuppressWarnings("serial")
