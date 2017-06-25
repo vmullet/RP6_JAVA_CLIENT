@@ -51,7 +51,11 @@ public class DriveCommand {
 		this._commandDuration = p_commandDuration;
 	}
 
-	public String toStringCommand() {
+	public String toStringCommandForAutoPilot() {
+		if (_robotDirection == RobotDirection.LEFT
+				|| _robotDirection == RobotDirection.RIGHT)
+			return "f" + "\n" + _robotSpeed;
+		
 		return getCommandFromDirection(_robotDirection) + "\n" + _robotSpeed;
 	}
 	

@@ -163,6 +163,7 @@ public class RobotClientUI extends JFrame {
 	private DefaultListModel<DriveCommand> _list_command_model;
 	private JLabel _lblCrerUneCommande;
 	private RobotTrajectory _editorTrajectory;
+	private JTextField _txtRobotPort;
 	/* - - -  END - - - */
 	
 	
@@ -490,11 +491,11 @@ public class RobotClientUI extends JFrame {
 		_contentPane.add(_txtAdrIp);
 
 		_btnConnect = new JButton("Connexion");
-		_btnConnect.setBounds(248, 21, 160, 41);
+		_btnConnect.setBounds(391, 21, 160, 41);
 		_contentPane.add(_btnConnect);
 
 		_btnDisconnect = new JButton("D\u00E9connexion");
-		_btnDisconnect.setBounds(435, 20, 150, 41);
+		_btnDisconnect.setBounds(571, 21, 150, 41);
 		_contentPane.add(_btnDisconnect);
 
 		JLabel lbl_etat_connexion = new JLabel("Etat de la connexion :");
@@ -522,9 +523,9 @@ public class RobotClientUI extends JFrame {
 		_contentPane.add(_txtLogArea);
 		writeToLogArea("Démarrage de l'application");
 
-		JLabel label = new JLabel("Adresse IP :");
-		label.setBounds(13, 20, 72, 35);
-		_contentPane.add(label);
+		JLabel lblIP = new JLabel("Adresse IP :");
+		lblIP.setBounds(13, 20, 72, 35);
+		_contentPane.add(lblIP);
 
 		JLabel lbl_batterie = new JLabel("Etat de la batterie :");
 		lbl_batterie.setBounds(13, 99, 129, 16);
@@ -634,13 +635,16 @@ public class RobotClientUI extends JFrame {
 					DriveCommand dc = new DriveCommand((RobotDirection) _cb_direction_command.getSelectedItem(),
 							Integer.parseInt(_txt_speed_command.getText()),
 							Integer.parseInt(_txt_duration_command.getText()));
-					RobotOrientation ro = _editorTrajectory.estimOrientationAt(_editorTrajectory.getCommandsListSize());
 					
-					RobotDirection rd = _editorTrajectory.getDirectionBaseOnOrientation(ro, (RobotDirection)_cb_direction_command.getSelectedItem());
+					
 					_editorTrajectory.addDriveCommand(dc);
 					
 					_list_command_model.addElement(dc);
 					_list_command.setModel(_list_command_model);
+					
+					RobotOrientation ro = _editorTrajectory.getOrientationAt(_editorTrajectory.getCommandsListSize() - 1);
+					
+					RobotDirection rd = _editorTrajectory.getDirectionBaseOnOrientation(ro, (RobotDirection)_cb_direction_command.getSelectedItem());
 					
 					int[] _selectedButtons = selectEditorGridNeighBoorButtons(2,rd,_editorLastPoint,_txt_speed_command.getText());
 					_editorSegmentMap.put(_editorTrajectory.getCommandsListSize() - 1 , _selectedButtons);
@@ -738,6 +742,16 @@ public class RobotClientUI extends JFrame {
 		_editorSelectedSegmentIndex = -1;
 
 		_btnDisconnect.setEnabled(false);
+		
+		JLabel lbl_port = new JLabel("Port :");
+		lbl_port.setBounds(247, 25, 37, 30);
+		_contentPane.add(lbl_port);
+		
+		_txtRobotPort = new JTextField();
+		_txtRobotPort.setFont(new Font("Tahoma", Font.BOLD, 16));
+		_txtRobotPort.setBounds(296, 20, 83, 41);
+		_contentPane.add(_txtRobotPort);
+		_txtRobotPort.setColumns(10);
 		//_tabPane.setEnabledAt(1, false);
 		//_tabPane.setEnabledAt(2, false);
 
@@ -966,7 +980,10 @@ public class RobotClientUI extends JFrame {
 
 			DriveCommand dc = rt.getCommandAt(i);
 			RobotDirection rd = dc.get_robotDirection();
-			rd = rt.getDirectionBaseOnOrientation(rt.estimOrientationAt(i),rd);
+			
+			RobotOrientation ro = rt.getOrientationAt(i);
+			
+			rd = rt.getDirectionBaseOnOrientation(ro, rd);
 			
 			indexList = selectPreviewGridNeighBoorButtons(2, rd, arrival, dc.get_robotSpeed() + "");
 			_previewSegmentMap.put(i, indexList); // Ajout des points du segment à la
@@ -1263,10 +1280,14 @@ public class RobotClientUI extends JFrame {
 		int[] indexList = null;
 		for (int i = 0; i < rt.getCommandsListSize(); i++) {
 
-			DriveCommand dc = rt.getCommandAt(i);
-			RobotDirection rd = dc.get_robotDirection();
-			rd = rt.getDirectionBaseOnOrientation(rt.estimOrientationAt(i),rd);
-			indexList = selectEditorGridNeighBoorButtons(2, rd, arrival, dc.get_robotSpeed() + "");
+			RobotDirection rd = rt.getCommandAt(i).get_robotDirection();
+			
+			RobotOrientation ro = rt.getOrientationAt(i);
+			
+			rd = rt.getDirectionBaseOnOrientation(ro, rd);
+			
+			indexList = selectEditorGridNeighBoorButtons(2, rd, arrival, rt.getCommandAt(i).get_robotSpeed() + "");
+			
 			_editorSegmentMap.put(i, indexList); // Ajout des points du segment à la
 											// hashmap (l'index du segment est
 											// l'index de la commande)
@@ -1480,11 +1501,12 @@ public class RobotClientUI extends JFrame {
 				// TODO Auto-generated method stub
 				_btnConnect.setEnabled(false);
 				_txtAdrIp.setEnabled(false);
+				_txtRobotPort.setEnabled(false);
 				BlinkerUI bk = new BlinkerUI(_imgConnectionState, new ImageIcon[] {
 						new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW), new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK) });
 				bk.startBlink();
-				writeToLogArea("Connexion en cours vers " + _txtAdrIp.getText() + ":" + RobotClient.getCONN_PORT());
-				_myClient.openConnection(_txtAdrIp.getText());
+				writeToLogArea("Connexion en cours vers " + _txtAdrIp.getText() + ":" + _txtRobotPort.getText());
+				_myClient.openConnection(_txtAdrIp.getText(),Integer.parseInt(_txtRobotPort.getText()));
 				Thread t1 = new Thread() {
 					@Override
 					public void run() {
@@ -1512,6 +1534,8 @@ public class RobotClientUI extends JFrame {
 							} else {
 								_btnConnect.setEnabled(true);
 								_txtAdrIp.setEnabled(true);
+								_txtRobotPort.setEnabled(true);
+								writeToLogArea("Erreur de connexion (TimeOut)");
 							}
 
 						} catch (InterruptedException e) {
@@ -1550,6 +1574,7 @@ public class RobotClientUI extends JFrame {
 						_btnConnect.setEnabled(true);
 						_btnDisconnect.setEnabled(false);
 						_txtAdrIp.setEnabled(true);
+						_txtRobotPort.setEnabled(true);
 						_tabPane.setEnabledAt(0, false);
 						_tabPane.setEnabledAt(1, false);
 						_tabPane.setEnabledAt(2, false);

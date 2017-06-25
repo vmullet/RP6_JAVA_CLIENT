@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import controller.RobotClient;
 import enums.RobotDirection;
@@ -13,8 +14,11 @@ public class RobotTrajectory {
 	private RobotClient _myClient;
 	private ArrayList<DriveCommand> _driveCommands;
 	private TrajectoryMode _trajMode;
+	
+	private HashMap<Integer, RobotOrientation> _orientationMap;
 
 	/* Attribute to manage through outter classes */
+	
 	private Thread drive_thread;
 	private boolean _stop = true;
 	private int _currentCommandIndex = -1;
@@ -26,6 +30,7 @@ public class RobotTrajectory {
 		_stop = true;
 		_currentCommandIndex = -1;
 		_currentOrientation = RobotOrientation.NONE;
+		_orientationMap = new HashMap<Integer,RobotOrientation>();
 	}
 
 	public RobotTrajectory(RobotClient p_client, ArrayList<DriveCommand> p_driveCommands, TrajectoryMode p_mode) {
@@ -50,6 +55,29 @@ public class RobotTrajectory {
 		this._trajMode = _trajMode;
 	}
 	
+
+	public void addDriveCommand(DriveCommand toAdd) {
+		_driveCommands.add(toAdd);
+		_orientationMap.put(_driveCommands.size() - 1, estimOrientationAt(_driveCommands.size() - 1));
+	}
+	
+	public void editDriveCommand(int index,DriveCommand dc) {
+		_driveCommands.get(index).set_robotDirection(dc.get_robotDirection());
+		_driveCommands.get(index).set_robotSpeed(dc.get_robotSpeed());
+		_driveCommands.get(index).set_commandDuration(dc.get_commandDuration());
+		recompileHashMap();
+	}
+	
+	private void recompileHashMap() {
+		_orientationMap.clear();
+		for (int i = 0 ; i < _driveCommands.size() ; i++) {
+			RobotOrientation robotOrientation = estimOrientationAt(i);
+			_orientationMap.put(i, robotOrientation);
+			
+		}
+	}
+
+	
 	public int getCommandsListSize() {
 		return _driveCommands.size();
 	}
@@ -58,7 +86,6 @@ public class RobotTrajectory {
 		return _driveCommands.get(index);
 	}
 	
-	
 	public int get_currentCommandIndex() {
 		return _currentCommandIndex;
 	}
@@ -66,6 +93,10 @@ public class RobotTrajectory {
 
 	public RobotOrientation get_currentOrientation() {
 		return _currentOrientation;
+	}
+	
+	public RobotOrientation getOrientationAt(int index) {
+		return _orientationMap.get(index);
 	}
 
 	public boolean is_running() {
@@ -78,6 +109,10 @@ public class RobotTrajectory {
 			duration += _driveCommands.get(i).get_commandDuration();
 		}
 		return duration;
+	}
+	
+	public void resetTrajectory() {
+		
 	}
 	
 	public RobotOrientation estimOrientationAt(int commandIndex) {
@@ -175,7 +210,7 @@ public class RobotTrajectory {
 					break;
 				}
 			}
-			System.out.println("after " + rd.toString() + "->" + ro.toString() + " ");
+			
 		}
 		return ro;
 	}
@@ -282,15 +317,29 @@ public class RobotTrajectory {
 		if (!_stop)
 		drive_thread.interrupt();
 	}
-
-	public void addDriveCommand(DriveCommand toAdd) {
-		_driveCommands.add(toAdd);
+	
+	private void turnLeft() {
+		_myClient.send("l");
+		_myClient.send("100");
+		try {
+			Thread.sleep(1765);
+			_myClient.send("stp");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public void editDriveCommand(int index,DriveCommand dc) {
-		_driveCommands.get(index).set_robotDirection(dc.get_robotDirection());
-		_driveCommands.get(index).set_robotSpeed(dc.get_robotSpeed());
-		_driveCommands.get(index).set_commandDuration(dc.get_commandDuration());
+	private void tunrRight() {
+		_myClient.send("r");
+		_myClient.send("100");
+		try {
+			Thread.sleep(1750);
+			_myClient.send("stp");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void executeCommands() {
@@ -299,48 +348,31 @@ public class RobotTrajectory {
 		_stop = false;
 		while(!_stop) {
 
-			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommand();
+			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommandForAutoPilot();
 
 			if (_driveCommands.get(_currentCommandIndex).get_robotDirection() == RobotDirection.LEFT) {
-				_myClient.send("l");
-				_myClient.send("100");
-				try {
-					Thread.sleep(1100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				turnLeft();
 			}
 			
 			if (_driveCommands.get(_currentCommandIndex).get_robotDirection() == RobotDirection.RIGHT) {
-				_myClient.send("r");
-				_myClient.send("100");
-				try {
-					Thread.sleep(1350);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				tunrRight();
 			}
 			
 			_myClient.send(full_command);
-
-			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(_currentCommandIndex).get_robotDirection()));
-
-			try {
-				Thread.sleep(_driveCommands.get(_currentCommandIndex).get_commandDuration() * 1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			
+			try{
+					Thread.sleep(_driveCommands.get(_currentCommandIndex).get_commandDuration() * 1000);
+			}catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();	
 			}
 			
 			nextCommand();
-			System.out.println(_currentCommandIndex);
 			if (_currentCommandIndex == 0 && _trajMode == TrajectoryMode.ONCE)
 				_stop = true;
-				
-			
+
 		}
+		_myClient.send("0");
 		_myClient.send("stp");
 	}
 	

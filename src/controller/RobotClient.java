@@ -12,6 +12,7 @@ import model.RobotSensorsData;
 public class RobotClient {
 
 	private String _robotIP;
+	private int _robotPort;
 	private Socket _robotSocket = null;
 	private BufferedReader _input = null;
 	private PrintWriter _output = null;
@@ -22,8 +23,6 @@ public class RobotClient {
 
 	private boolean _is_connecting;
 	private boolean _is_connected = false;
-	
-	static int CONN_PORT = 2000;
 
 	public RobotClient() {
 		_robotState = RobotState.NONE;
@@ -54,26 +53,19 @@ public class RobotClient {
 		this._is_connecting = p_is_connecting;
 	}
 	
-	
-	public static int getCONN_PORT() {
-		return CONN_PORT;
-	}
-	
-	
-
 	public RobotSensorsData get_data() {
 		return _data;
 	}
 
-	public void openConnection(String p_robotIP) {
+	public void openConnection(String p_robotIP,int p_robotPort) {
 
 		_robotIP = p_robotIP;
-		System.out.println(_robotIP);
+		_robotPort = p_robotPort;
 		_is_connecting = true;
 			Thread t1 = new Thread() {
 				public void run() {
 					try {	
-						_robotSocket = new Socket(_robotIP, CONN_PORT);
+						_robotSocket = new Socket(_robotIP, _robotPort);
 						_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
 						_output = new PrintWriter(_robotSocket.getOutputStream(),true);
 						Thread.sleep(1000);

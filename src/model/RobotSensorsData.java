@@ -39,7 +39,7 @@ public class RobotSensorsData {
 	}
 	
 	public int getBatteryPercentage() {
-		return (_batteryPower - 560) * 100 / (850 - 560);
+		return (_batteryPower - 560) * 100 / (720 - 560);
 	}
 	
 	public int get_desiredSpeedLeft() {
@@ -167,9 +167,10 @@ public class RobotSensorsData {
 			case 12:
 				value = value.replaceAll("[^\\d.]","");
 				float delta = Math.abs(Float.parseFloat(value) - _previousDistance);
+				System.out.println(delta);
 				_distanceLeft = Integer.parseInt(value,10);
 				_totalDistance += delta;
-				_previousDistance = _distanceRight;
+				_previousDistance = _distanceLeft;
 				break;
 			case 13:
 				value = value.replaceAll("[^\\d.]","");
