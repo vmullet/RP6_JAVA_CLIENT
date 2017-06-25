@@ -6,11 +6,12 @@ import javax.swing.border.EmptyBorder;
 
 import model.BlinkerUI;
 import model.DriveCommand;
-import model.RobotDirection;
 import model.RobotTrajectory;
-import model.TrajectoryMode;
 import controller.RobotClient;
 import controller.RobotIO;
+import enums.RobotDirection;
+import enums.RobotOrientation;
+import enums.TrajectoryMode;
 
 import javax.swing.JTabbedPane;
 import javax.swing.DefaultListModel;
@@ -37,6 +38,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.net.URL;
 
 import javax.swing.JTextField;
@@ -630,11 +634,15 @@ public class RobotClientUI extends JFrame {
 					DriveCommand dc = new DriveCommand((RobotDirection) _cb_direction_command.getSelectedItem(),
 							Integer.parseInt(_txt_speed_command.getText()),
 							Integer.parseInt(_txt_duration_command.getText()));
+					RobotOrientation ro = _editorTrajectory.estimOrientationAt(_editorTrajectory.getCommandsListSize());
+					
+					RobotDirection rd = _editorTrajectory.getDirectionBaseOnOrientation(ro, (RobotDirection)_cb_direction_command.getSelectedItem());
 					_editorTrajectory.addDriveCommand(dc);
 					
 					_list_command_model.addElement(dc);
 					_list_command.setModel(_list_command_model);
-					int[] _selectedButtons = selectEditorGridNeighBoorButtons(2,(RobotDirection)_cb_direction_command.getSelectedItem(),_editorLastPoint,_txt_speed_command.getText());
+					
+					int[] _selectedButtons = selectEditorGridNeighBoorButtons(2,rd,_editorLastPoint,_txt_speed_command.getText());
 					_editorSegmentMap.put(_editorTrajectory.getCommandsListSize() - 1 , _selectedButtons);
 					_editorLastPoint = _selectedButtons[1];
 				}
@@ -706,6 +714,17 @@ public class RobotClientUI extends JFrame {
 		lblTrajectoryMode.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblTrajectoryMode.setBounds(728, 13, 144, 16);
 		tabEditor.add(lblTrajectoryMode);
+		
+		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				if (_myClient.is_connected())
+				_myClient.send("quit");
+			}
+			
+			
+		});
 
 		_previewSegmentMap = new HashMap<Integer, int[]>();
 		_previewSelectedSegmentIndex = -1;
@@ -719,8 +738,8 @@ public class RobotClientUI extends JFrame {
 		_editorSelectedSegmentIndex = -1;
 
 		_btnDisconnect.setEnabled(false);
-		_tabPane.setEnabledAt(1, false);
-		_tabPane.setEnabledAt(2, false);
+		//_tabPane.setEnabledAt(1, false);
+		//_tabPane.setEnabledAt(2, false);
 
 		declareResources();
 		buildUI();
@@ -946,7 +965,10 @@ public class RobotClientUI extends JFrame {
 		for (int i = 0; i < rt.getCommandsListSize(); i++) {
 
 			DriveCommand dc = rt.getCommandAt(i);
-			indexList = selectPreviewGridNeighBoorButtons(2, dc.get_robotDirection(), arrival, dc.get_robotSpeed() + "");
+			RobotDirection rd = dc.get_robotDirection();
+			rd = rt.getDirectionBaseOnOrientation(rt.estimOrientationAt(i),rd);
+			
+			indexList = selectPreviewGridNeighBoorButtons(2, rd, arrival, dc.get_robotSpeed() + "");
 			_previewSegmentMap.put(i, indexList); // Ajout des points du segment à la
 											// hashmap (l'index du segment est
 											// l'index de la commande)
@@ -956,7 +978,7 @@ public class RobotClientUI extends JFrame {
 														// prochain)
 		}
 	}
-
+	
 	/* - - - SELECT PREVIEW GRID BUTTONS - - -  */
 	
 	private void selectPreviewButton(int index, Color color) {
@@ -1242,7 +1264,9 @@ public class RobotClientUI extends JFrame {
 		for (int i = 0; i < rt.getCommandsListSize(); i++) {
 
 			DriveCommand dc = rt.getCommandAt(i);
-			indexList = selectEditorGridNeighBoorButtons(2, dc.get_robotDirection(), arrival, dc.get_robotSpeed() + "");
+			RobotDirection rd = dc.get_robotDirection();
+			rd = rt.getDirectionBaseOnOrientation(rt.estimOrientationAt(i),rd);
+			indexList = selectEditorGridNeighBoorButtons(2, rd, arrival, dc.get_robotSpeed() + "");
 			_editorSegmentMap.put(i, indexList); // Ajout des points du segment à la
 											// hashmap (l'index du segment est
 											// l'index de la commande)

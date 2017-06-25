@@ -8,8 +8,8 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import enums.RobotDirection;
 import model.DriveCommand;
-import model.RobotDirection;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;

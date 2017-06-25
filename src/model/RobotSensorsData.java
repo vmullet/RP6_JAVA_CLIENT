@@ -18,7 +18,18 @@ public class RobotSensorsData {
 	private int _lightSensorLeft;
 	private int _lightSensorRight;
 	
+	private float _totalDistance;
+	private float _previousDistance = 0;
+	
 	final int FULL_BATTERY_POWER = 720;
+	
+	public RobotSensorsData() {
+		_totalDistance = 0.0f;
+		_previousDistance = 0.0f;
+		_distanceLeft = 0.0f;
+		_distanceRight = 0.0f;
+		
+	}
 	
 	public int get_batteryPower() {
 		return _batteryPower;
@@ -109,9 +120,7 @@ public class RobotSensorsData {
 	}
 	
 	public float getTotalDistanceMeter() {
-		if (_distanceLeft == 1.0f)
-			_distanceLeft = 0.0f;
-		return _distanceLeft * 0.25f / 1000;
+		return _totalDistance * 0.25f / 1000f;
 	}
 	
 	public void parseString(String full_data) {
@@ -157,11 +166,15 @@ public class RobotSensorsData {
 				break;
 			case 12:
 				value = value.replaceAll("[^\\d.]","");
+				float delta = Math.abs(Float.parseFloat(value) - _previousDistance);
 				_distanceLeft = Integer.parseInt(value,10);
+				_totalDistance += delta;
+				_previousDistance = _distanceRight;
 				break;
 			case 13:
 				value = value.replaceAll("[^\\d.]","");
 				_distanceRight = Integer.parseInt(value,10);
+				
 				break;
 				
 			}

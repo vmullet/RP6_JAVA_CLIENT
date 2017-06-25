@@ -3,6 +3,10 @@ package model;
 import java.util.ArrayList;
 
 import controller.RobotClient;
+import enums.RobotDirection;
+import enums.RobotOrientation;
+import enums.RobotState;
+import enums.TrajectoryMode;
 
 public class RobotTrajectory {
 
@@ -14,11 +18,14 @@ public class RobotTrajectory {
 	private Thread drive_thread;
 	private boolean _stop = true;
 	private int _currentCommandIndex = -1;
+	private RobotOrientation _currentOrientation;
 
 	public RobotTrajectory() {
 		_driveCommands = new ArrayList<DriveCommand>();
 		_trajMode = TrajectoryMode.NONE;
 		_stop = true;
+		_currentCommandIndex = -1;
+		_currentOrientation = RobotOrientation.NONE;
 	}
 
 	public RobotTrajectory(RobotClient p_client, ArrayList<DriveCommand> p_driveCommands, TrajectoryMode p_mode) {
@@ -55,6 +62,11 @@ public class RobotTrajectory {
 	public int get_currentCommandIndex() {
 		return _currentCommandIndex;
 	}
+	
+
+	public RobotOrientation get_currentOrientation() {
+		return _currentOrientation;
+	}
 
 	public boolean is_running() {
 		return !_stop;
@@ -66,6 +78,166 @@ public class RobotTrajectory {
 			duration += _driveCommands.get(i).get_commandDuration();
 		}
 		return duration;
+	}
+	
+	public RobotOrientation estimOrientationAt(int commandIndex) {
+		RobotOrientation ro = RobotOrientation.FACE_FRONT;
+		
+		for (int i = 0 ; i < commandIndex ; i++) {
+			RobotDirection rd = _driveCommands.get(i).get_robotDirection();
+			boolean found = false;
+			
+			if (ro == RobotOrientation.FACE_FRONT && !found) {
+				switch(rd) {
+				case FORWARD:
+					ro = RobotOrientation.FACE_FRONT;
+					found = true;
+					break;
+				case BACKWARD:
+					ro = RobotOrientation.FACE_FRONT;
+					found = true;
+					break;
+				case LEFT:
+					ro = RobotOrientation.SIDE_LEFT;
+					found = true;
+					break;
+				case RIGHT:
+					ro = RobotOrientation.SIDE_RIGHT;
+					found = true;
+					break;
+				case NONE:
+					break;
+				}
+			}
+			if (ro == RobotOrientation.FACE_REAR && !found) {
+				switch(rd) {
+				case FORWARD:
+					ro = RobotOrientation.FACE_REAR;
+					found = true;
+					break;
+				case BACKWARD:
+					ro = RobotOrientation.FACE_REAR;
+					found = true;
+					break;
+				case LEFT:
+					ro = RobotOrientation.SIDE_RIGHT;
+					found = true;
+					break;
+				case RIGHT:
+					ro = RobotOrientation.SIDE_LEFT;
+					found = true;
+					break;
+				case NONE:
+					break;
+				}
+			}
+			if (ro == RobotOrientation.SIDE_LEFT && !found) {
+				switch(rd) {
+				case FORWARD:
+					ro = RobotOrientation.SIDE_LEFT;
+					found = true;
+					break;
+				case BACKWARD:
+					ro = RobotOrientation.SIDE_LEFT;
+					found = true;
+					break;
+				case LEFT:
+					ro = RobotOrientation.FACE_REAR;
+					found = true;
+					break;
+				case RIGHT:
+					ro = RobotOrientation.FACE_FRONT;
+					found = true;
+					break;
+				case NONE:
+					break;
+				}
+			}
+			if (ro == RobotOrientation.SIDE_RIGHT && !found) {
+				switch(rd) {
+				case FORWARD:
+					ro = RobotOrientation.SIDE_RIGHT;
+					found = true;
+					break;
+				case BACKWARD:
+					ro = RobotOrientation.SIDE_RIGHT;
+					found = true;
+					break;
+				case LEFT:
+					ro = RobotOrientation.FACE_FRONT;
+					found = true;
+					break;
+				case RIGHT:
+					ro = RobotOrientation.FACE_REAR;
+					found = true;
+					break;
+				case NONE:
+					break;
+				}
+			}
+			System.out.println("after " + rd.toString() + "->" + ro.toString() + " ");
+		}
+		return ro;
+	}
+	
+	public RobotDirection getDirectionBaseOnOrientation(RobotOrientation ro,RobotDirection rd) {
+		RobotDirection to_return = rd;
+		if (ro == RobotOrientation.SIDE_LEFT) {
+			switch(rd) {
+			case FORWARD:
+				to_return =  RobotDirection.LEFT;
+				break;
+			case BACKWARD:
+				to_return =  RobotDirection.RIGHT;
+				break;
+			case LEFT:
+				to_return =  RobotDirection.BACKWARD;
+				break;
+			case RIGHT:
+				to_return =  RobotDirection.FORWARD;
+				break;
+			case NONE:
+				break;
+			}
+		}
+		if (ro == RobotOrientation.SIDE_RIGHT) {
+			switch(rd) {
+			case FORWARD:
+				to_return =  RobotDirection.RIGHT;
+				break;
+			case BACKWARD:
+				to_return =  RobotDirection.LEFT;
+				break;
+			case LEFT:
+				to_return =  RobotDirection.FORWARD;
+				break;
+			case RIGHT:
+				to_return =  RobotDirection.BACKWARD;
+				break;
+			case NONE:
+				break;
+			}
+		}
+		if (ro == RobotOrientation.FACE_REAR) {
+			switch(rd) {
+			case FORWARD:
+				to_return =  RobotDirection.BACKWARD;
+				break;
+			case BACKWARD:
+				to_return =  RobotDirection.FORWARD;
+				break;
+			case LEFT:
+				to_return =  RobotDirection.RIGHT;
+				break;
+			case RIGHT:
+				to_return =  RobotDirection.LEFT;
+				break;
+			case NONE:
+				break;
+			}
+		}
+		
+		return to_return;
 	}
 	
 	public void startAutoPilot() {
@@ -122,13 +294,36 @@ public class RobotTrajectory {
 	}
 
 	private void executeCommands() {
+		
 		_currentCommandIndex = 0;
 		_stop = false;
 		while(!_stop) {
 
 			String full_command = _driveCommands.get(_currentCommandIndex).toStringCommand();
 
-			//_myClient.send(full_command);
+			if (_driveCommands.get(_currentCommandIndex).get_robotDirection() == RobotDirection.LEFT) {
+				_myClient.send("l");
+				_myClient.send("100");
+				try {
+					Thread.sleep(1100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if (_driveCommands.get(_currentCommandIndex).get_robotDirection() == RobotDirection.RIGHT) {
+				_myClient.send("r");
+				_myClient.send("100");
+				try {
+					Thread.sleep(1350);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			_myClient.send(full_command);
 
 			_myClient.set_robotState(getStateFromDirection(_driveCommands.get(_currentCommandIndex).get_robotDirection()));
 
@@ -141,11 +336,12 @@ public class RobotTrajectory {
 			
 			nextCommand();
 			System.out.println(_currentCommandIndex);
-			if (_currentCommandIndex == _driveCommands.size() - 1 && _trajMode == TrajectoryMode.ONCE)
+			if (_currentCommandIndex == 0 && _trajMode == TrajectoryMode.ONCE)
 				_stop = true;
 				
 			
 		}
+		_myClient.send("stp");
 	}
 	
 	private void nextCommand() {

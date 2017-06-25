@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import enums.TrajectoryMode;
 import model.DriveCommand;
 import model.RobotTrajectory;
-import model.TrajectoryMode;
 
 public final class RobotIO {
 

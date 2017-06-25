@@ -1,5 +1,7 @@
 package model;
 
+import enums.RobotDirection;
+
 public class DriveCommand {
 
 	private RobotDirection _robotDirection;

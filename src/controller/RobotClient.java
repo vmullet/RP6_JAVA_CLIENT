@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import enums.RobotState;
 import model.RobotSensorsData;
-import model.RobotState;
 
 public class RobotClient {
 
