@@ -81,7 +81,7 @@ A traj file **always** starts with **"--BEGIN--"** and ends with **"--END--"**.
 
 The second line of the file defines the trajectory mode which can be: **"ONCE"** or **"LOOP"** _(with two stars before and after the word)_
 
-All other lines defines the drive commands which compose the trajectory ; a drive command is follows this regular expression:
+All other lines defines the drive commands which compose the trajectory ; a drive command follows this regular expression:
 **[f|b|l|r][{][0-9]{1,3}[}][-][>][0-9]+**
 
 **Example** : f{85}->15 means (_"Move forward at speed 85 during 15 seconds"_)
