@@ -51,10 +51,51 @@ The different classes in the project have a defined role which is the following 
 - **RobotClientConsole** : The class which holds the way the console mode works
 - **ConsoleState** : The class which defines the current state of the console mode (WAIT for user input,etc...)
 
+## Command mode
+
+**NOTE : The command mode is the mode when the robot is able to interpret the commands that you will send to it. To enter this mode, when the robot connects, the client sends "\ncmd".(In the client, it is automatic.)**
+
+## Commands syntax for remote control
+
+The command syntax interpreted by the **C program** installed on the wifi module is very simple:
+
+The first parameter is the direction :
+- **f** : FORWARD
+- **b** : BACKWARD
+- **l** : LEFT
+- **r** : RIGHT
+
+The second parameter is the speed which is an integer number between 1 and 160
+
+**NOTE : The direction and the speed must be separated with a break line "\n"**
+
+_Example_ : **"f\n110"**
+
+## Traj File Format
+
+The autopilot is based on a specific file format that I created and which is called .traj file.
+This is the standard structure of a traj file :
+A traj file **always** starts with **"--BEGIN--"** and ends with **"--END--"**.
+The second line of the file defines the trajectory mode which can be: **"ONCE"** or **"LOOP"** _(with two stars before and after the word)_
+All other lines defines the drive commands which compose the trajectory ; a drive command is follows this regular expression:
+**[f|b|l|r][{][0-9]{1,3}[}][-][>][0-9]+**
+
+**Example** : f{85}->15 means (_"Move forward at speed 85 during 15 seconds"_)
+
+## Trajectory Editor
+
+The Java client includes a graphical trajectory editor to create a traj file.
+
+## Console Mode
+
+The console mode is useful if you want to use the client on a non graphical OS such as a Linux distribution for example.
+To launch the console, you have to export the client as a runnable jar and use the following command :
+_**java -jar my_client.jar --console**_
+
+For more information about the commands, you can use the command ".help" once the console mode is started or you can check the file **RobotClientConsole.java** in the source code.
 
 ## License
  
  This project is licensed under GNU 3.0
- 
  
  [rp6_link]: <http://www.arexx.com/rp6/html/en/software.htm>
