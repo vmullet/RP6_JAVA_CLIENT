@@ -74,9 +74,13 @@ _Example_ : **"f\n110"**
 ## Traj File Format
 
 The autopilot is based on a specific file format that I created and which is called .traj file.
+
 This is the standard structure of a traj file :
+
 A traj file **always** starts with **"--BEGIN--"** and ends with **"--END--"**.
+
 The second line of the file defines the trajectory mode which can be: **"ONCE"** or **"LOOP"** _(with two stars before and after the word)_
+
 All other lines defines the drive commands which compose the trajectory ; a drive command is follows this regular expression:
 **[f|b|l|r][{][0-9]{1,3}[}][-][>][0-9]+**
 
