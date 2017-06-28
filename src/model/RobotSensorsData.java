@@ -167,7 +167,6 @@ public class RobotSensorsData {
 			case 12:
 				value = value.replaceAll("[^\\d.]","");
 				float delta = Math.abs(Float.parseFloat(value) - _previousDistance);
-				System.out.println(delta);
 				_distanceLeft = Integer.parseInt(value,10);
 				_totalDistance += delta;
 				_previousDistance = _distanceLeft;

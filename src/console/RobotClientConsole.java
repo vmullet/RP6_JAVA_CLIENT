@@ -51,7 +51,7 @@ public class RobotClientConsole {
 	public RobotClientConsole() {
 		_consoleState = ConsoleState.NONE;
 		_userInput = "";
-		_scanner = new Scanner(System.in);
+		_scanner = null;
 		_client = new RobotClient();
 		_stop = true;
 	}
@@ -64,8 +64,23 @@ public class RobotClientConsole {
 				2);
 		writeWithBreak("RP6 Client V1.0 Démarré [" + new Date() + "]", 2);
 		writeWithBreak("Pour obtenir la liste complète des commandes, vous pouvez utiliser la commande .help", 2);
+		_consoleState = ConsoleState.RUNNING;
 		while (!_stop) {
-			startStateMachine();
+			
+			switch(_consoleState) {
+			case NONE:
+				break;
+			case RUNNING:
+				startStateMachine();
+				break;
+			case DRIVING:
+				startDriveMachine();
+				break;
+			case WAIT:
+				break;
+				
+			};
+			
 		}
 
 	}
@@ -75,14 +90,28 @@ public class RobotClientConsole {
 		switch (_userInput) {
 
 		case "connect":
-			displayConnectForm();
+			if (_client.is_connected()) {
+				writeWithBreak("Vous êtes déjà connecté à l'adresse " + _client.get_robotIP(), 1);
+			}
+			else {
+				displayConnectForm();
+			}
 			break;
 
 		case "disconnect":
-			if (_client.is_connected())
+			if (_client.is_connected()) {
 				_client.closeConnection();
+			}	
 			else {
 				writeWithBreak("Vous n'êtes connecté à aucun robot RP6", 1);
+			}
+			break;
+			
+		case "command":
+			if (_client.is_connected()) {
+				writeWithBreak("Bienvenue dans le mode de pilotage manuel du RP6", 1);
+				writeWithBreak("Veuillez saisir une direction : f|b|l|r", 1);
+				_consoleState = ConsoleState.DRIVING;
 			}
 			break;
 
@@ -92,8 +121,11 @@ public class RobotClientConsole {
 
 		case "quit":
 			_stop = true;
-			if (_client.is_connected())
+			if (_client.is_connected()) {
+				_client.send("quit");
 				_client.closeConnection();
+			}
+				
 			writeWithBreak("Fermeture de RP6 Client...", 1);
 			writeWithBreak("RP6 Client fermé", 1);
 			break;
@@ -105,23 +137,84 @@ public class RobotClientConsole {
 		}
 
 	}
-
-	public void displayHelp() {
+	
+	private void startDriveMachine() {
+		waitDrive();
+		String speed = "";
+		switch(_userInput) {
+		
+		case "f":
+			writeWithBreak("Veuillez saisir une vitesse entre 1 et 160",1);
+			speed = _scanner.nextLine();
+			_client.send("f\n" + speed);
+			break;
+			
+		case "b":
+			writeWithBreak("Veuillez saisir une vitesse entre 1 et 160",1);
+			speed = _scanner.nextLine();
+			_client.send("b\n" + speed);
+			break;
+			
+		case "l":
+			writeWithBreak("Veuillez saisir une vitesse entre 1 et 160",1);
+			speed = _scanner.nextLine();
+			_client.send("l\n" + speed);
+			break;
+			
+		case "r":
+			writeWithBreak("Veuillez saisir une vitesse entre 1 et 160",1);
+			speed = _scanner.nextLine();
+			_client.send("r\n" + speed);
+			break;
+		
+		case "stop":
+			_client.send("stp");
+			break;
+			
+		case ".help":
+			displayHelp();
+			break;
+		
+		case "quit":
+			_client.send("stp");
+			writeWithBreak("Vous avez quitté le mode de pilotage", 1);
+			_consoleState = ConsoleState.RUNNING;
+			break;
+		}
+	}
+	
+	private void waitDrive() {
+		write(">>> ");
+		_userInput = _scanner.nextLine();
+	}
+	
+	private void displaySensorsForm() {
+		writeWithBreak("", 1);
+	}
+	
+	
+	private void displayHelp() {
 		writeWithBreak("", 1);
 		writeWithBreak("LISTE DES COMMANDES :", 2);
 		writeWithBreak("1: connect		|	Permet de se connecter au RP6", 2);
 		writeWithBreak("2: disconnect		|	Permet de se déconnecter du RP6", 2);
+		writeWithBreak("3: command		|	Permet d'entrer en mode 'command' pour contrôler le RP6", 2);
+		writeWithBreak("4: quit		|	Permet de fermer le client", 2);
+		
 		writeWithBreak(
-				"------------------------------- COMMANDES FONCTIONNANT UNIQUEMENT SI L'ON EST CONNECTE  ---------------------------------------",
+				"------------------------------- COMMANDES FONCTIONNANT UNIQUEMENT SI L'ON EST EN MODE COMMAND  ---------------------------------------",
 				2);
-		writeWithBreak("3: Contrôle du robot", 2);
+		writeWithBreak("4: Contrôle du robot", 2);
 		writeWithBreak("[f|b|l|r][0-9]+		|	Syntaxe d'une commande pour piloter le robot", 1);
 		writeWithBreak("f,b,l,r			|	Commandes directionnelles (f = forward , b = backward, l = left, r = right",
 				1);
 		writeWithBreak("[0-9]+			|	Vitesse désirée pour la commande (entier entre 1 et 160 : 160 -> 40cm/s)",
 				2);
+		writeWithBreak("stop			|	Permet de stopper le robot",
+				2);
+		writeWithBreak("quit			|	Permet de quitter le mode 'command'",2);
 		writeWithBreak(
-				"4: sensors -XXX		|	Permet d'afficher les valeurs des différents capteurs où X est l'identifiant d'un capteur",
+				"sensors -XXX		|	Permet d'afficher les valeurs des différents capteurs où X est l'identifiant d'un capteur",
 				1);
 		writeWithBreak("			-all  : Affiche tous les capteurs", 1);
 		writeWithBreak("			-bp  :  Affiche le pourcentage restant de batterie", 1);
@@ -157,27 +250,44 @@ public class RobotClientConsole {
 	}
 
 	private void waitUser() {
+		_scanner = new Scanner(System.in);
 		write("> ");
-		_userInput = _scanner.next();
+		_userInput = _scanner.nextLine();
 	}
 	
 	private void displayConnectForm() {
 		String adr_ip = "";
 		int port = -1;
-		write("Veuillez saisir l'adresse IP du RP6:");
+		write("Veuillez saisir l'adresse IP du RP6: ");
 		adr_ip = _scanner.next();
-		write("Veuillez saisir votre port de connexion:");
+		write("Veuillez saisir votre port de connexion: ");
 		port = _scanner.nextInt();
 		_client.openConnection(adr_ip, port);
-		while(_client.is_connecting()) {
-			
-		}
-		if (_client.is_connected()) {
-			writeWithBreak("Connecté au Robot RP6 à l'adresse " + adr_ip + ":" + port, 1);
-		}
-		else {
-			writeWithBreak("Echec lors de la connexion. Veuillez vérifier les informations saisies ou que le RP6 est bien connecté à votre réseau", 1);
-		}
+		write("Connexion en cours à " + adr_ip + ":" + port + "\n");
+		_consoleState = ConsoleState.WAIT;
+		Thread t1 = new Thread() {
+			@Override
+			public void run() {
+				while(_client.is_connecting()) {
+					write(".");
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+		
+				if (_client.is_connected()) {
+					writeWithBreak("\nConnecté au Robot RP6 à l'adresse " + _client.get_robotIP(), 1);
+				}
+				else {
+					writeWithBreak("\nEchec lors de la connexion. Veuillez vérifier les informations saisies ou que le RP6 est bien connecté à votre réseau", 1);
+				}
+				_consoleState = ConsoleState.RUNNING;
+			}
+		};
+		t1.start();
 		
 	}
 

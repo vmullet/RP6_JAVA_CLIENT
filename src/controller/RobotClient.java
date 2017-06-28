@@ -89,7 +89,7 @@ public class RobotClient {
 						// TODO Auto-generated catch block
 						_is_connecting = false;
 						_is_connected = false;
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 
 				}
