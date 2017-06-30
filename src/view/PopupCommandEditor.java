@@ -113,7 +113,7 @@ public class PopupCommandEditor extends JDialog {
 		
 	}
 	
-	public static boolean checkValues(JComboBox combo,JTextField speed,JTextField duration) {
+	public static boolean checkValues(JComboBox<RobotDirection> combo,JTextField speed,JTextField duration) {
 		boolean ok = false;
 		if (combo.getSelectedIndex() != -1 && !speed.getText().equals("") && !duration.getText().equals("")) {
 			try {
