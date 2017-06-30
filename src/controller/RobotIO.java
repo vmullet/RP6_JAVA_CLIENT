@@ -14,21 +14,39 @@ import enums.TrajectoryMode;
 import model.DriveCommand;
 import model.RobotTrajectory;
 
+/**
+ * Static class to read, write and check the validity
+ * of trajectory files (.traj files)
+ * @author Valentin
+ *
+ */
 public final class RobotIO {
 
+	/**
+	 * Attribute to hold the last/current read file as an ArrayList of String (1 line = 1 element)
+	 */
 	private static ArrayList<String> _readFile = new ArrayList<String>();
 
+	/**
+	 * Static Method to get the {@link RobotIO#_readFile}
+	 * @return The value of the attribute
+	 */
 	public static ArrayList<String> getLastReadFile() {
 		return _readFile;
 	}
 
+	/**
+	 * Static Methd to read a .traj file
+	 * @param p_filepath The path of the file to tread
+	 * @return	The RobotTrajectory object based on this file
+	 */
 	public static RobotTrajectory readTrajFile(String p_filepath) {
 
-		if (isTrajFileValid(p_filepath)) {
+		if (isTrajFileValid(p_filepath)) {	// If the file is valid
 			RobotTrajectory trajectory = new RobotTrajectory();
-			if (_readFile.get(1).equals("**ONCE**"))
+			if (_readFile.get(1).equals("**ONCE**"))		// If the file starts by "ONCE"
 				trajectory.set_trajMode(TrajectoryMode.ONCE);
-			else if (_readFile.get(1).equals("**LOOP**"))
+			else if (_readFile.get(1).equals("**LOOP**"))	// OR by "LOOP"
 				trajectory.set_trajMode(TrajectoryMode.LOOP);
 
 			for (int i = 2; i < _readFile.size() - 1; i++) {
@@ -41,6 +59,12 @@ public final class RobotIO {
 		return null;
 	}
 
+	/**
+	 * Static Method to write a traj file
+	 * @param p_trajectory The RobotTrajectory to translate into a traj file
+	 * @param p_filepath The path where the generated traj file will be written
+	 * @return Return the path where the file will be written
+	 */
 	public static String writeTrajFile(RobotTrajectory p_trajectory, String p_filepath) {
 
 		try {
@@ -64,6 +88,11 @@ public final class RobotIO {
 		return p_filepath;
 	}
 
+	/**
+	 * Static Method to check if the syntax of the traj file is correct/valid
+	 * @param p_filepath The path of the file to check
+	 * @return Return TRUE or FALSE if the file is valid or not
+	 */
 	public static boolean isTrajFileValid(String p_filepath) {
 
 		readFileContent(p_filepath);
@@ -79,6 +108,10 @@ public final class RobotIO {
 		return true;
 	}
 
+	/**
+	 * Method to read a file and stores its content into the _readFile attribute
+	 * @param p_filepath The path of the file to read
+	 */
 	private static void readFileContent(String p_filepath) {
 
 		_readFile = new ArrayList<String>();
@@ -96,9 +129,14 @@ public final class RobotIO {
 
 	}
 
+	/**
+	 * Static Method to translate a string command into a DriveCommand object
+	 * @param instruction The command instruction to translate
+	 * @return
+	 */
 	private static DriveCommand getDriveCommandFromString(String instruction) {
 
-		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,3})[}][-][>]([0-9]+)");
+		Pattern p = Pattern.compile("([f|b|l|r])[{]([0-9]{1,3})[}][-][>]([0-9]+)"); // Check if it is valid with a regular expression
 		Matcher m = p.matcher(instruction);
 		boolean b = m.matches();
 		DriveCommand dc = null;

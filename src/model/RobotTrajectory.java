@@ -9,12 +9,31 @@ import enums.RobotOrientation;
 import enums.RobotState;
 import enums.TrajectoryMode;
 
+/**
+ * Class which allows to store a trajectory which can be executed automatically by the robot
+ * @author Valentin
+ *
+ */
 public class RobotTrajectory {
 
+	/**
+	 * Attribute which stores the client attached ot this trajectory
+	 */
 	private RobotClient _myClient;
+	
+	/**
+	 * Attribut which stores the drive commands contained inside this trajectory
+	 */
 	private ArrayList<DriveCommand> _driveCommands;
+	
+	/**
+	 * Attribute which stores the trajectory mode (1 time or infinite)
+	 */
 	private TrajectoryMode _trajMode;
 	
+	/**
+	 * Attribute which stores the orientation of the robot at every commands
+	 */
 	private HashMap<Integer, RobotOrientation> _orientationMap;
 
 	/* Attribute to manage through outter classes */
@@ -24,6 +43,9 @@ public class RobotTrajectory {
 	private int _currentCommandIndex = -1;
 	private RobotOrientation _currentOrientation;
 
+	/**
+	 * Default constructor
+	 */
 	public RobotTrajectory() {
 		_driveCommands = new ArrayList<DriveCommand>();
 		_trajMode = TrajectoryMode.NONE;
@@ -33,6 +55,12 @@ public class RobotTrajectory {
 		_orientationMap = new HashMap<Integer,RobotOrientation>();
 	}
 
+	/**
+	 * Constructor with main parameters
+	 * @param p_client The client attached to this trajectory
+	 * @param p_driveCommands The drive commands inside this trajectory
+	 * @param p_mode The mode of this trajecory
+	 */
 	public RobotTrajectory(RobotClient p_client, ArrayList<DriveCommand> p_driveCommands, TrajectoryMode p_mode) {
 		_myClient = p_client;
 		_driveCommands = p_driveCommands;
@@ -56,11 +84,20 @@ public class RobotTrajectory {
 	}
 	
 
+	/**
+	 * Method to add a driveCommand to the list
+	 * @param toAdd DriveCommand to add
+	 */
 	public void addDriveCommand(DriveCommand toAdd) {
 		_driveCommands.add(toAdd);
 		_orientationMap.put(_driveCommands.size() - 1, estimOrientationAt(_driveCommands.size() - 1));
 	}
 	
+	/**
+	 * Method to replace a driveCommand at index by another
+	 * @param index Index of the actual command to replace
+	 * @param dc DriveCommand which will replace the previous one
+	 */
 	public void editDriveCommand(int index,DriveCommand dc) {
 		_driveCommands.get(index).set_robotDirection(dc.get_robotDirection());
 		_driveCommands.get(index).set_robotSpeed(dc.get_robotSpeed());
@@ -68,6 +105,9 @@ public class RobotTrajectory {
 		recompileHashMap();
 	}
 	
+	/**
+	 * Method to update the orientationHashMap after edit of the driveCommand list
+	 */
 	private void recompileHashMap() {
 		_orientationMap.clear();
 		for (int i = 0 ; i < _driveCommands.size() ; i++) {
@@ -77,14 +117,23 @@ public class RobotTrajectory {
 		}
 	}
 
-	
+	/**
+	 * Method to get the number of driveCommands into the list
+	 * @return
+	 */
 	public int getCommandsListSize() {
 		return _driveCommands.size();
 	}
 	
+	/**
+	 * Method to get the driveCommand at the given index
+	 * @param index Index where the driveCommand is located
+	 * @return The driveCommand located at this index
+	 */
 	public DriveCommand getCommandAt(int index) {
 		return _driveCommands.get(index);
 	}
+	
 	
 	public int get_currentCommandIndex() {
 		return _currentCommandIndex;
@@ -95,14 +144,27 @@ public class RobotTrajectory {
 		return _currentOrientation;
 	}
 	
+	/**
+	 * Method to get the orientation at the given index in the hashMap
+	 * @param index Index where the orientation is located
+	 * @return The orientation at the given index
+	 */
 	public RobotOrientation getOrientationAt(int index) {
 		return _orientationMap.get(index);
 	}
 
+	/**
+	 * Method to know if the autopilot is running
+	 * @return The state of the autopilot (running or not)
+	 */
 	public boolean is_running() {
 		return !_stop;
 	}
 
+	/**
+	 * Method to get the total duration of one loop of the robot trajectory
+	 * @return The total duration of one loop of this robot trajectory
+	 */
 	public int getTotalDuration() {
 		int duration = 0;
 		for (int i = 0 ; i< _driveCommands.size() ; i++) {
@@ -115,6 +177,11 @@ public class RobotTrajectory {
 		
 	}
 	
+	/**
+	 * Method to estimate the orientation of the robot after many commands
+	 * @param commandIndex The commandIndex where we want the orientation of the robot
+	 * @return The orientation of the robot at this commandIndex
+	 */
 	public RobotOrientation estimOrientationAt(int commandIndex) {
 		RobotOrientation ro = RobotOrientation.FACE_FRONT;
 		
@@ -215,6 +282,12 @@ public class RobotTrajectory {
 		return ro;
 	}
 	
+	/**
+	 * Method to get the 2D direction based on the orientation and the 3D direction( for the UI editor)
+	 * @param ro Actual robotOrientation
+	 * @param rd The direction wanted
+	 * @return The 2D direction based on the two parameters
+	 */
 	public RobotDirection getDirectionBaseOnOrientation(RobotOrientation ro,RobotDirection rd) {
 		RobotDirection to_return = rd;
 		if (ro == RobotOrientation.SIDE_LEFT) {
@@ -275,6 +348,9 @@ public class RobotTrajectory {
 		return to_return;
 	}
 	
+	/**
+	 * Method to start the autopilot mode and execute the trajectory in the correct trajectory mode
+	 */
 	public void startAutoPilot() {
 
 		drive_thread = new Thread() {
@@ -309,15 +385,24 @@ public class RobotTrajectory {
 
 	}
 
+	/**
+	 * Method to stop the autopilot
+	 */
 	public void stopAutoPilot() {
 		_stop = true;
 	}
 	
+	/**
+	 * Method to force the autopilot to stop by interrupting the thread
+	 */
 	public void forceStopAutoPilot() {
 		if (!_stop)
 		drive_thread.interrupt();
 	}
 	
+	/**
+	 * Method to turn the robot of 90 degrees on the left
+	 */
 	private void turnLeft() {
 		_myClient.send("l");
 		_myClient.send("100");
@@ -330,6 +415,9 @@ public class RobotTrajectory {
 		}
 	}
 	
+	/**
+	 * Method to turn the robot of 90 degrees on the right
+	 */
 	private void tunrRight() {
 		_myClient.send("r");
 		_myClient.send("100");
@@ -342,6 +430,9 @@ public class RobotTrajectory {
 		}
 	}
 
+	/**
+	 * Method to execute the commands of the drive commands list
+	 */
 	private void executeCommands() {
 		
 		_currentCommandIndex = 0;
@@ -376,6 +467,9 @@ public class RobotTrajectory {
 		_myClient.send("stp");
 	}
 	
+	/**
+	 * Method to go to next command and adjusting if needed
+	 */
 	private void nextCommand() {
 		if (_currentCommandIndex + 1 >= _driveCommands.size())
 			_currentCommandIndex = 0;
@@ -383,7 +477,11 @@ public class RobotTrajectory {
 			_currentCommandIndex++;
 	}
 	
-
+	/**
+	 * Method to get the state of the robot based on its direction
+	 * @param p_direction The direction of the robot to translate
+	 * @return The robot state based on this direction
+	 */
 	private RobotState getStateFromDirection(RobotDirection p_direction) {
 		RobotState state = RobotState.NONE;
 

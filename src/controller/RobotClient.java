@@ -9,17 +9,23 @@ import java.net.Socket;
 import enums.RobotState;
 import model.RobotSensorsData;
 
+/**
+ * Class wich allows to connect to the robot by using a socket connection
+ * (Get,Send data,connect,disconnect...)
+ * @author Valentin
+ *
+ */
 public class RobotClient {
 
 	private String _robotIP;
 	private int _robotPort;
 	private Socket _robotSocket = null;
-	private BufferedReader _input = null;
-	private PrintWriter _output = null;
+	private BufferedReader _input = null;	// Allow to receive the transmitted data
+	private PrintWriter _output = null;		// Allow to send commands to the robot
 
-	private RobotState _robotState;
+	private RobotState _robotState;			// Actual state of the robot
 	
-	private RobotSensorsData _data;
+	private RobotSensorsData _data;			// To store the data sent by the robot
 
 	private boolean _is_connecting;
 	private boolean _is_connected = false;
@@ -31,6 +37,10 @@ public class RobotClient {
 
 	public String get_robotIP() {
 		return _robotIP;
+	}
+	
+	public int get_robotPort() {
+		return _robotPort;
 	}
 
 	public RobotState get_robotState() {
@@ -57,6 +67,11 @@ public class RobotClient {
 		return _data;
 	}
 
+	/**
+	 * Open a socket connection with the robot to get the transmitted data
+	 * @param p_robotIP	Address IP to connect to the robot
+	 * @param p_robotPort	Port to open the connection
+	 */
 	public void openConnection(String p_robotIP,int p_robotPort) {
 
 		_robotIP = p_robotIP;
@@ -65,27 +80,25 @@ public class RobotClient {
 			Thread t1 = new Thread() {
 				public void run() {
 					try {	
-						_robotSocket = new Socket(_robotIP, _robotPort);
-						_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream()));
-						_output = new PrintWriter(_robotSocket.getOutputStream(),true);
-						Thread.sleep(1000);
 						
-						send("");
-						send("cmd");
+							_robotSocket = new Socket(_robotIP, _robotPort);	// Open the socket connection
+							_input = new BufferedReader(new InputStreamReader(_robotSocket.getInputStream())); // Get the transmitted data of the robot
+							_output = new PrintWriter(_robotSocket.getOutputStream(),true);	// Send command to the robot
+							Thread.sleep(1000);
 						
-						_is_connecting = false;
-						_is_connected = true;
+							send("");	// wake up the program installed on the rp6
+							send("cmd");
 						
-						String message = "";
+							_is_connecting = false;
+							_is_connected = true;
 						
-						while ((message = _input.readLine()) != null) {
+							String message = "";
+						
+							while ((message = _input.readLine()) != null) {
 								_data.parseString(message);
+							}	
 							
-						}
-						
-						
-							
-					}catch (Exception e) {
+						}catch (Exception e) {
 						// TODO Auto-generated catch block
 						_is_connecting = false;
 						_is_connected = false;
@@ -101,6 +114,10 @@ public class RobotClient {
 			
 	}
 
+	/**
+	 * Close the connection open by the openConnection method
+	 * and reset the BufferedReader and printWriter
+	 */
 	public void closeConnection() {
 			if (_robotSocket != null) {
 						send("quit");
@@ -116,6 +133,11 @@ public class RobotClient {
 						
 	}
 
+	/**
+	 * Send a command to the robot
+	 * @param p_message The command to send to the robot 
+	 * (automatically ended by a break line)
+	 */
 	public void send(String p_message) {
 		_output.println(p_message);
 		_output.flush();

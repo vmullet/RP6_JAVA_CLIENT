@@ -1,5 +1,10 @@
 package enums;
 
+/**
+ * Enum to get the actual state of the robot (auto or manual and what directions)
+ * @author Valentin
+ *
+ */
 public enum RobotState {
 
 	NONE, /* The robot is doing nothing */

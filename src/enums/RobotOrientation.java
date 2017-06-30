@@ -1,5 +1,10 @@
 package enums;
 
+/**
+ * Enum to define the different orientation possible for the robot
+ * @author Valentin
+ *
+ */
 public enum RobotOrientation {
 
 	NONE,

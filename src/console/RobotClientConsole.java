@@ -7,15 +7,41 @@ import controller.RobotClient;
 import controller.RobotIO;
 import model.RobotTrajectory;
 
+/**
+ * Class which defines the console mode of the RP6 Client
+ * @author Valentin
+ *
+ */
 public class RobotClientConsole {
 
+	/**
+	 * Attribute to control the actual state of the console mode
+	 */
 	private ConsoleState _consoleState;
+	
+	/**
+	 * Attribute to store the actual input of the user
+	 */
 	private String _userInput;
+	
+	/**
+	 * Attribute to store the scanner which will wait/read the user input
+	 */
 	private Scanner _scanner;
+	
+	/**
+	 * Attribute to hold the robot client to interact with the robot
+	 */
 	private RobotClient _client;
+	
+	/**
+	 * Attribute to hold the trajectory which can be loaded by the appropriate command
+	 */
 	private RobotTrajectory _loadedTrajectory;
-	private boolean _stop = false;
-
+	
+	/**
+	 * Attribute to hold the Ascii title displayed at start
+	 */
 	private static String ascii_title = "\r\n"
 			+ " /$$$$$$$  /$$$$$$$   /$$$$$$         /$$$$$$  /$$ /$$                       /$$           /$$    /$$   /$$        /$$$$$$ \r\n"
 			+ "| $$__  $$| $$__  $$ /$$__  $$       /$$__  $$| $$|__/                      | $$          | $$   | $$ /$$$$       /$$$_  $$\r\n"
@@ -30,40 +56,117 @@ public class RobotClientConsole {
 
 	// #region Colors constants
 
+	/**
+	 * Static attribute to end an ANSI Tag for the color / background property
+	 */
 	public static final String ANSI_RESET = "\u001B[0m";
+	
+	/**
+	 * Static attribute for the black color in ANSI
+	 */
 	public static final String ANSI_BLACK = "\u001B[30m";
+	
+	/**
+	 * Static attribute for the red color in ANSI
+	 */
 	public static final String ANSI_RED = "\u001B[31m";
+	
+	/**
+	 * Static attribute for the green color in ANSI
+	 */
 	public static final String ANSI_GREEN = "\u001B[32m";
+	
+	/**
+	 * Static attribute for the yellow color in ANSI
+	 */
 	public static final String ANSI_YELLOW = "\u001B[33m";
+	
+	/**
+	 * Static attribute for the blue color in ANSI
+	 */
 	public static final String ANSI_BLUE = "\u001B[34m";
+	
+	/**
+	 * Static attribute for the purple color in ANSI
+	 */
 	public static final String ANSI_PURPLE = "\u001B[35m";
+	
+	/**
+	 * Static attribute for the cyan color in ANSI
+	 */
 	public static final String ANSI_CYAN = "\u001B[36m";
+	
+	/**
+	 * Static attribute for the white color in ANSI
+	 */
 	public static final String ANSI_WHITE = "\u001B[37m";
 
+	/**
+	 * Static attribute for the black background color in ANSI
+	 */
 	public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+	
+	/**
+	 * Static attribute for the red background color in ANSI
+	 */
 	public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+	
+	/**
+	 * Static attribute for the green background color in ANSI
+	 */
 	public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+	
+	/**
+	 * Static attribute for the yellow background color in ANSI
+	 */
 	public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+	
+	/**
+	 * Static attribute for the blue background color in ANSI
+	 */
 	public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+	
+	/**
+	 * Static attribute for the purple background color in ANSI
+	 */
 	public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
+	
+	/**
+	 * Static attribute for the cyan background color in ANSI
+	 */
 	public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
+	
+	/**
+	 * Static attribute for the white background color in ANSI
+	 */
 	public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
 	// #endregion
 
+	/**
+	 * Default constructor
+	 */
 	public RobotClientConsole() {
 		_consoleState = ConsoleState.NONE;
 		_userInput = "";
-		_scanner = null;
+		_scanner = new Scanner(System.in);;
 		_client = new RobotClient();
 		_loadedTrajectory = null;
-		_stop = true;
 	}
 	
+	/**
+	 * Method to display text on the console without break line (shorter than System.out)
+	 * @param text Text to be displayed on the console without automatic break
+	 */
 	private void write(String text) {
 		System.out.print(text);
 	}
 
+	/**
+	 * Method to display text on the console with break lines
+	 * @param text Text to be displayed on the console without automatic break line
+	 * @param nbbreak Number of breaks after this line
+	 */
 	private void writeWithBreak(String text, int nbbreak) {
 		System.out.print(text);
 		for (int i = 0; i < nbbreak; i++) {
@@ -71,38 +174,49 @@ public class RobotClientConsole {
 		}
 	}
 
+	/**
+	 * Method to wait for the user input in DEFAULT mode
+	 */
 	private void waitUser() {
-		_scanner = new Scanner(System.in);
 		write("> ");
 		_userInput = _scanner.nextLine();
 	}
 	
+	/**
+	 * Method to wait for the user input in COMMAND mode
+	 */
 	private void waitDrive() {
-		write(">>> ");
+		write("[ "+ _client.get_robotIP() + ":" + _client.get_robotPort() +" ]>>> ");
 		_userInput = _scanner.nextLine();
 	}
 
+	/**
+	 * Method to start the console and a loop based on a console state
+	 */
 	public void startConsole() {
-		_stop = false;
-		System.out.println(ANSI_YELLOW + ascii_title + ANSI_RESET);
+		
+		writeWithBreak(ANSI_YELLOW + ascii_title + ANSI_RESET,1);	// Title ASCII
 		writeWithBreak(
 				"************************************************** CONSOLE MODE ********************************************************",
 				2);
 		writeWithBreak("RP6 Client V1.0 Démarré [" + new Date() + "]", 2);
 		writeWithBreak("Pour obtenir la liste complète des commandes, vous pouvez utiliser la commande .help", 2);
-		_consoleState = ConsoleState.RUNNING;
-		while (!_stop) {
+		
+		_consoleState = ConsoleState.DEFAULT; // Initiate Console State
+		
+		while (_consoleState != ConsoleState.NONE) {
 			
 			switch(_consoleState) {
 			case NONE:
 				break;
-			case RUNNING:
-				startStateMachine();
+			case DEFAULT:
+				startDefaultMode();
 				break;
-			case DRIVING:
-				startDriveMachine();
+			case COMMAND:
+				startCommandMode();
 				break;
 			case WAIT:
+				// Useful empty state when waiting for Threads
 				break;
 				
 			};
@@ -111,7 +225,10 @@ public class RobotClientConsole {
 
 	}
 
-	private void startStateMachine() {
+	/**
+	 * Method to start the default mode and which will loop in DEFAULT State
+	 */
+	private void startDefaultMode() {
 		waitUser();
 		switch (_userInput) {
 
@@ -137,7 +254,7 @@ public class RobotClientConsole {
 			if (_client.is_connected()) {
 				writeWithBreak("Bienvenue dans le mode de pilotage manuel du RP6", 1);
 				writeWithBreak("Veuillez saisir une commande compatible avec le mode 'command'. Vous pouvez utiliser la commande .help si besoin", 1);
-				_consoleState = ConsoleState.DRIVING;
+				_consoleState = ConsoleState.COMMAND; // The command will start on next loop
 			}
 			else {
 				writeWithBreak("Veuillez d'abord vous connecter au RP6 via la commande 'connect'", 1);
@@ -149,7 +266,7 @@ public class RobotClientConsole {
 			break;
 
 		case "quit":
-			_stop = true;
+			_consoleState = ConsoleState.NONE;
 			if (_client.is_connected()) {
 				_client.send("quit");
 				_client.closeConnection();
@@ -167,7 +284,10 @@ public class RobotClientConsole {
 
 	}
 	
-	private void startDriveMachine() {
+	/**
+	 * Method to start the command Mode and which will loop in COMMAND State
+	 */
+	private void startCommandMode() {
 		waitDrive();
 		String speed = "";
 		switch(_userInput) {
@@ -212,7 +332,7 @@ public class RobotClientConsole {
 				_loadedTrajectory.startAutoPilot();
 			}
 			else {
-				writeWithBreak("Fichier .traj valide. Veuillez vérifier que le fichier est correct.", 1);
+				writeWithBreak("Fichier .traj invalide. Veuillez vérifier que le fichier est correct.", 1);
 			}
 			
 			break;
@@ -235,7 +355,7 @@ public class RobotClientConsole {
 		case "quit":
 			_client.send("stp");
 			writeWithBreak("Vous avez quitté le mode de pilotage", 1);
-			_consoleState = ConsoleState.RUNNING;
+			_consoleState = ConsoleState.DEFAULT;
 			break;
 			
 		default:
@@ -245,7 +365,9 @@ public class RobotClientConsole {
 	}
 	
 	
-	
+	/**
+	 * Method to display sensors value in the console
+	 */
 	private void displaySensorsForm() {
 		writeWithBreak("Veuillez indiquer l'identifiant du/des capteurs souhaités", 1);
 		waitDrive();
@@ -316,6 +438,9 @@ public class RobotClientConsole {
 	}
 	
 	
+	/**
+	 * Method to display the help / console manual
+	 */
 	private void displayHelp() {
 		writeWithBreak("", 1);
 		writeWithBreak("LISTE DES COMMANDES :", 2);
@@ -361,7 +486,9 @@ public class RobotClientConsole {
 	}
 
 	
-	
+	/**
+	 * Method to display the connect process when user enters the "connect" command
+	 */
 	private void displayConnectForm() {
 		String adr_ip = "";
 		int port = -1;
@@ -371,7 +498,7 @@ public class RobotClientConsole {
 		port = _scanner.nextInt();
 		_client.openConnection(adr_ip, port);
 		write("Connexion en cours à " + adr_ip + ":" + port + "\n");
-		_consoleState = ConsoleState.WAIT;
+		_consoleState = ConsoleState.WAIT; // Empty state to wait until the thread has determined if the connection was possible or not
 		Thread t1 = new Thread() {
 			@Override
 			public void run() {
@@ -391,7 +518,7 @@ public class RobotClientConsole {
 				else {
 					writeWithBreak("\nEchec lors de la connexion. Veuillez vérifier les informations saisies ou que le RP6 est bien connecté à votre réseau", 1);
 				}
-				_consoleState = ConsoleState.RUNNING;
+				_consoleState = ConsoleState.DEFAULT; // Return to DEFAULT state
 			}
 		};
 		t1.start();
