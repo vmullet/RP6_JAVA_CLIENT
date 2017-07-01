@@ -29,14 +29,14 @@ public final class RobotIO {
 
 	/**
 	 * Static Method to get the {@link RobotIO#_readFile}
-	 * @return The value of the attribute
+	 * @return The value of the attribute _readFile
 	 */
 	public static ArrayList<String> getLastReadFile() {
 		return _readFile;
 	}
 
 	/**
-	 * Static Methd to read a .traj file
+	 * Static Method to read a .traj file
 	 * @param p_filepath The path of the file to tread
 	 * @return	The RobotTrajectory object based on this file
 	 */

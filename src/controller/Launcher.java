@@ -5,7 +5,7 @@ import view.RobotClientUI;
 
 /**
  * Main class
- * soit le mode graphique ou le mode console
+ * which starts the graphical mode or the console mode
  * @author Valentin
  *
  */
