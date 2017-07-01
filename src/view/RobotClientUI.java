@@ -768,6 +768,9 @@ public class RobotClientUI extends JFrame {
 		requestFocusInWindow();
 	}
 
+	/**
+	 * Method to affect the image path to constants variables
+	 */
 	private void declareResources() {
 		IMG_UP_ARROW_PATH = getClass().getResource("/up-arrow.png");
 		IMG_DOWN_ARROW_PATH = getClass().getResource("/down-arrow.png");
@@ -790,6 +793,10 @@ public class RobotClientUI extends JFrame {
 		IMG_RP6_PATH = getClass().getResource("/rp6.jpg");
 	}
 
+	/**
+	 * Method to set the different listeners for the keybaord,mouse,UI fields
+	 * fill comboBoxes, draw the different grids for the trajectory
+	 */
 	private void buildUI() {
 
 		buildPreviewGrid(11);
@@ -816,6 +823,10 @@ public class RobotClientUI extends JFrame {
 	}
 
 
+	/**
+	 * Method to display the different default image in the interface
+	 * when the client is started
+	 */
 	private void setIcons() {
 		_btnMoveUpward.setIcon(new ImageIcon(IMG_UP_ARROW_PATH));
 		_btnMoveBackward.setIcon(new ImageIcon(IMG_DOWN_ARROW_PATH));
@@ -827,6 +838,9 @@ public class RobotClientUI extends JFrame {
 	}
 	
 
+	/**
+	 * Method to display the sensor values and update them while the client is connected to the robot
+	 */
 	private void displayRobotData() {
 		Thread t1 = new Thread() {
 			@Override
@@ -880,6 +894,10 @@ public class RobotClientUI extends JFrame {
 		t1.start();
 	}
 
+	/**
+	 * Method to reset the different fields containing the sensor values
+	 * (when the robot is disconnected for example)
+	 */
 	private void resetRobotData() {
 		_txt_distance_left.setText("");
 		_txt_distance_right.setText("");
@@ -897,6 +915,10 @@ public class RobotClientUI extends JFrame {
 		_txt_manual_distance.setText("");
 	}
 
+	/**
+	 * Method to update the battery level icon depending of its value
+	 * @param batteryValue The actual battery value in percentage
+	 */
 	private void showBatteryState(int batteryValue) {
 		ImageIcon ic1 = null;
 		_lblBatteryWarning.setIcon(null);
@@ -915,12 +937,21 @@ public class RobotClientUI extends JFrame {
 		_imgBatteryState.setIcon(ic1);
 	}
 
+	/**
+	 * Method to write text inside the log area
+	 * Message structure: [DATE] : MESSAGE_TO_WRITE \n
+	 * @param message The MESSAGE_TO_WRITE
+	 */
 	private void writeToLogArea(String message) {
 		_txtLogArea.setText(_txtLogArea.getText() + "[" + new Date() + "] : " + message + "\n");
 	}
 
 	
 
+	/**
+	 * Method to build the preview grid in the Autocontrol tab
+	 * @param size The size of the grid to build (ex: 5 = a square grid of 5x5) (a odd number is better !!!) 
+	 */
 	private void buildPreviewGrid(int size) {
 		_previewGridSize = size;
 		_previewBtns = new JButton[size * size];
@@ -936,6 +967,11 @@ public class RobotClientUI extends JFrame {
 	}
 
 
+	/**
+	 * Method to determine the middle point of the grid
+	 * and set it as the start point
+	 * @param size The size of the grid built (a odd number is better !!!)
+	 */
 	private void setStartPointButtonPreview(int size) {
 		_previewBaseStartPoint = (size / 2 + 1) * (size - 1);
 		_previewBtns[_previewBaseStartPoint].setBackground(new Color(255, 0, 0));
@@ -943,6 +979,10 @@ public class RobotClientUI extends JFrame {
 	}
 	
 
+	/**
+	 * Method to build the editor grid in the create trajectory tab
+	 * @param size The size of the grid to build (ex: 5 = a square grid of 5x5) (a odd number is better !!!) 
+	 */
 	private void buildEditorGrid(int size) {
 		_editorGridSize = size;
 		_editorBtns = new JButton[size * size];
@@ -958,6 +998,11 @@ public class RobotClientUI extends JFrame {
 	}
 
 
+	/**
+	 * Method to determine the middle point of the grid
+	 * and set is as the start point
+	 * @param size The size of the grid built
+	 */
 	private void setStartPointButtonEditor(int size) {
 		_editorBaseStartPoint = (size / 2 + 1) * (size - 1);
 		_editorBtns[_previewBaseStartPoint].setBackground(new Color(255, 0, 0));
@@ -965,12 +1010,22 @@ public class RobotClientUI extends JFrame {
 	}
 	
 
+	/**
+	 * Method to set Text of a preview grid button
+	 * @param index The index of the button in the button array
+	 * @param text The text value to affect
+	 */
 	private void setPreviewGridButtonText(int index, String text) {
 		_previewBtns[index].setForeground(Color.WHITE);
 		_previewBtns[index].setFont(new Font("Arial", Font.PLAIN, 10));
 		_previewBtns[index].setText(text);
 	}
 
+	/**
+	 * Method to set Text of an editor grid button
+	 * @param index The index of the button in the button array
+	 * @param text The text value to affect
+	 */
 	private void setEditorGridButtonText(int index, String text) {
 		_editorBtns[index].setForeground(Color.WHITE);
 		_editorBtns[index].setFont(new Font("Arial", Font.PLAIN, 12));
@@ -978,7 +1033,12 @@ public class RobotClientUI extends JFrame {
 	}
 
 
-	public void drawTrajOnPreviewGrid(RobotTrajectory rt) {
+	/**
+	 * Method to draw a trajectory on the preview grid based on a
+	 * RobotTrajectory object
+	 * @param rt The robotTrajectory object to draw
+	 */
+	private void drawTrajOnPreviewGrid(RobotTrajectory rt) {
 		int arrival = _previewBaseStartPoint; // Point de départ
 		int[] indexList = null;
 		for (int i = 0; i < rt.getCommandsListSize(); i++) {
@@ -1003,19 +1063,40 @@ public class RobotClientUI extends JFrame {
 	
 	/* - - - SELECT PREVIEW GRID BUTTONS - - -  */
 	
+	/**
+	 * Method to select a button of the preview grid
+	 * by affecting a color to it
+	 * @param index The index of the button in the button array
+	 * @param color The color to affect
+	 */
 	private void selectPreviewButton(int index, Color color) {
 		_previewBtns[index].setBackground(color);
 	}
 
+	/**
+	 * Method to unselect a button of the preview grid 
+	 * by setting its color to the default color
+	 * @param index The index of the button to unselect in the button array
+	 */
 	private void unSelectPreviewButton(int index) {
 		_previewBtns[index].setBackground(_previewDefaultButtonColor);
 	}
 
+	/**
+	 * Method to select a button of the trajectory inside
+	 * the preview grid (The current trajectory executed)
+	 * @param index The index of the button to select 
+	 */
 	private void selectPreviewTrajButton(int index) {
 		if (index != _previewBaseStartPoint)
 			_previewBtns[index].setBackground(Color.GREEN);
 	}
 
+	/**
+	 * Method to unselect a button of the trajectory inside
+	 * the preview grid by setting its color to black or red if it is the start point
+	 * @param index The index of the button to unselect
+	 */
 	private void unSelectPreviewTrajButton(int index) {
 		if (index != _previewBaseStartPoint)
 			_previewBtns[index].setBackground(Color.BLACK);
@@ -1024,7 +1105,15 @@ public class RobotClientUI extends JFrame {
 	}
 	
 
-	
+	/**
+	 * Method to get X neightboor buttons of a button in a specific direction
+	 * and affect their values to a specific text
+	 * @param nbButtons The number of neightboor buttons ( = segment length)
+	 * @param direction The direction of these buttons (ex : the 2 buttons on the left of THIS button)
+	 * @param actual The button index from who the direction is based
+	 * @param text The text value to affect to these neightboor buttons
+	 * @return An array of indexes of these neightboor buttons (array of size = nbButtons parameter)
+	 */
 	private int[] selectPreviewGridNeighBoorButtons(int nbButtons, RobotDirection direction, int actual, String text) {
 		int lastIndex = -1;
 		int[] indexList = new int[nbButtons];
@@ -1088,12 +1177,17 @@ public class RobotClientUI extends JFrame {
 		return indexList;
 	}
 
+	/**
+	 * Method to select a segment (line of buttons) of the preview grid which is a graphical representation of a
+	 * driveCommand object
+	 * @param index The index of the segment to select
+	 */
 	private void selectPreviewSegment(int index) {
 		if (_previewSelectedSegmentIndex == -1) {
 			_previewSelectedSegmentIndex = index;
 			int[] btnIndexes = _previewSegmentMap.get(index);
 			for (int i = 0; i < btnIndexes.length; i++) {
-				selectPreviewTrajButton(btnIndexes[i]);
+				selectPreviewTrajButton(btnIndexes[i]); // Select the button which compose the segment
 			}
 		}
 		else {
@@ -1102,35 +1196,46 @@ public class RobotClientUI extends JFrame {
 				_previewSelectedSegmentIndex = index;
 				int[] btnIndexes = _previewSegmentMap.get(index);
 				for (int i = 0; i < btnIndexes.length; i++) {
-					selectPreviewTrajButton(btnIndexes[i]);
+					selectPreviewTrajButton(btnIndexes[i]); // Select the button which compose the segment
 				}
 			}
 		}
 			
 	}
 
+	/**
+	 * Method to unselect a segment of the preview grid
+	 * @param index The index of the segment to unselect
+	 */
 	private void unSelectPreviewSegment(int index) {
 
 		if (index != -1) {
 			int[] btnIndexes = _previewSegmentMap.get(index);
 			for (int i = 0; i < btnIndexes.length; i++) {
-				unSelectPreviewTrajButton(btnIndexes[i]);
+				unSelectPreviewTrajButton(btnIndexes[i]); // Unselect the button which compose the segment
 			}
 		}
 		
 
 	}
-
+	
+	/**
+	 * Method to unselect the currently selected segment
+	 */
 	private void unSelectCurrentPreviewSegment() {
 
 		int[] btnIndexes = _previewSegmentMap.get(_previewSelectedSegmentIndex);
 		for (int i = 0; i < btnIndexes.length; i++) {
-			unSelectPreviewTrajButton(btnIndexes[i]);
+			unSelectPreviewTrajButton(btnIndexes[i]);	// Unselect the button which compose the segment
 		}
 
 	}
 	
 
+	/**
+	 * Method to reset the preview grid
+	 * and the linked variables
+	 */
 	private void resetPreviewGrid() {
 		for (int i = 0; i < _previewBtns.length; i++) {
 			unSelectPreviewButton(i);
@@ -1142,6 +1247,15 @@ public class RobotClientUI extends JFrame {
 	
 	/* - - - END - - - */
 	
+	/**
+	 * Method to get X neightboor buttons of a button in a specific direction
+	 * and affect their values to a specific text inside the editor grid
+	 * @param nbButtons The number of neightboor buttons ( = segment length)
+	 * @param direction The direction of these buttons (ex : the 2 buttons on the left of THIS button)
+	 * @param actual The button index from who the direction is based
+	 * @param text The text value to affect to these neightboor buttons
+	 * @return An array of indexes of these neightboor buttons (array of size = nbButtons parameter)
+	 */
 	private int[] selectEditorGridNeighBoorButtons(int nbButtons, RobotDirection direction, int actual, String text) {
 		int lastIndex = -1;
 		if (actual == -1)
@@ -1209,14 +1323,28 @@ public class RobotClientUI extends JFrame {
 	
 	/* - - - SELECT EDITOR BUTTONS METHODS - - -  */
 	
+	/**
+	 * Method to select a button of the editor grid and affect it
+	 * a specific color
+	 * @param index The index of the button to select
+	 * @param color The color to affect to this button
+	 */
 	private void selectEditorButton(int index, Color color) {
 		_editorBtns[index].setBackground(color);
 	}
 
+	/**
+	 * Method to unselect a button of the editor grid
+	 * @param index the index of the button to unselect
+	 */
 	private void unSelectEditorButton(int index) {
 		_editorBtns[index].setBackground(_previewDefaultButtonColor);
 	}
 	
+	/**
+	 * Method to select a segment (line of buttons) of the editor grid
+	 * @param index The index of the segment to select
+	 */
 	private void selectEditorSegment(int index) {
 		if (_editorSelectedSegmentIndex != -1)
 			unSelectEditorSegment(_editorSelectedSegmentIndex);
@@ -1229,6 +1357,10 @@ public class RobotClientUI extends JFrame {
 
 	}
 
+	/**
+	 * Method to unselect a segment of the editor grid
+	 * @param index The index of the segment to unselect
+	 */
 	private void unSelectEditorSegment(int index) {
 
 		int[] btnIndexes = _editorSegmentMap.get(index);
@@ -1238,6 +1370,9 @@ public class RobotClientUI extends JFrame {
 
 	}
 
+	/**
+	 * Method to unselect the currently selected segment inside the editor grid
+	 */
 	private void unSelectCurrentEditorSegment() {
 
 		int[] btnIndexes = _editorSegmentMap.get(_editorSelectedSegmentIndex);
@@ -1247,11 +1382,19 @@ public class RobotClientUI extends JFrame {
 
 	}
 	
+	/**
+	 * Method to select a button of the trajectory (from BLACK to GREEN)
+	 * @param index The index of the traj button to select
+	 */
 	private void selectEditorTrajButton(int index) {
 		if (index != _editorBaseStartPoint)
 			_editorBtns[index].setBackground(Color.GREEN);
 	}
 
+	/**
+	 * Method to unselect a selected button of the trajectory (from GREEN to BLACK)
+	 * @param index The index of the traj button to unselect
+	 */
 	private void unSelectEditorTrajButton(int index) {
 		if (index != _editorBaseStartPoint)
 			_editorBtns[index].setBackground(Color.BLACK);
@@ -1260,6 +1403,10 @@ public class RobotClientUI extends JFrame {
 	}
 	
 
+	/**
+	 * Method to reset the editor grid and
+	 * its variables
+	 */
 	private void resetEditorGrid() {
 		for (int i = 0; i < _previewBtns.length; i++) {
 			unSelectEditorButton(i);
@@ -1269,6 +1416,12 @@ public class RobotClientUI extends JFrame {
 		}
 	}
 	
+	/**
+	 * Method to edit a driveCommand and replace its values by
+	 * those of another driveCommand (used by the popupCommandEditor)
+	 * @param index The index of the driveCommand to edit inside the robotTrajectory
+	 * @param dc The driveCommand containing new values to affect to the one which will be edited
+	 */
 	public void replaceDriveCommand(int index,DriveCommand dc) {
 		_editorTrajectory.editDriveCommand(index, dc);
 		_editorSegmentMap.clear();
@@ -1280,6 +1433,11 @@ public class RobotClientUI extends JFrame {
 		_txt_duration_command.setText("");
 	}
 	
+	/**
+	 * Method to draw a trajectory (multiple segments) on the grid editor based on
+	 * a robotTrajectory object
+	 * @param rt The robotTrajectory to represent graphically
+	 */
 	private void drawTrajOnEditorGrid(RobotTrajectory rt) {
 		int arrival = _editorBaseStartPoint; // Point de départ
 		int[] indexList = null;
@@ -1306,7 +1464,12 @@ public class RobotClientUI extends JFrame {
 	/* - - - END - - - */
 
 
-	public void setMouseListeners(RobotDirection direction) {
+	/**
+	 * Method to affect the listener to the buttons UP,DOWN,LEFT,RIGHT in the manual
+	 * control tab
+	 * @param direction The direction associated to the different buttons
+	 */
+	private void setMouseListeners(RobotDirection direction) {
 		switch (direction) {
 		case FORWARD:
 			_btnMoveUpward.addMouseListener(getMouseListenerByDirection(RobotDirection.FORWARD));
@@ -1327,6 +1490,11 @@ public class RobotClientUI extends JFrame {
 		}
 	}
 
+	/**
+	 * Method to generate the good MouseListener for a specific direction
+	 * @param direction The direction for the MouseListener needed
+	 * @return The correct MouseListener for this direction
+	 */
 	private MouseListener getMouseListenerByDirection(RobotDirection direction) {
 
 		MouseListener listener = new MouseListener() {
@@ -1391,6 +1559,10 @@ public class RobotClientUI extends JFrame {
 		return listener;
 	}
 
+	/**
+	 * Method to attach the keyListener for the 4 keyboards keys (UP_ARROW,
+	 * DOWN_ARROW,LEFT_ARROW,RIGHT_ARROW)
+	 */
 	private void addKeyListener() {
 
 		this.addKeyListener(new KeyListener() {
@@ -1467,6 +1639,10 @@ public class RobotClientUI extends JFrame {
 
 	}
 
+	/**
+	 * Method to attach the action when there's a click on the browse button
+	 * for a traj file
+	 */
 	private void setBrowseFileListener() {
 		_btnBrowseTrajFile.addActionListener(new ActionListener() {
 
@@ -1499,6 +1675,10 @@ public class RobotClientUI extends JFrame {
 		});
 	}
 
+	/**
+	 * Method to attach the action when there's a click on the connect
+	 * button
+	 */
 	private void setBtnConnectListener() {
 		_btnConnect.addActionListener(new ActionListener() {
 			@Override
@@ -1558,6 +1738,10 @@ public class RobotClientUI extends JFrame {
 		});
 	}
 
+	/**
+	 * Method to attach the action when there's a click on the disconnect
+	 * button
+	 */
 	private void setBtnDisconnectListener() {
 		_btnDisconnect.addActionListener(new ActionListener() {
 			@Override
@@ -1596,6 +1780,10 @@ public class RobotClientUI extends JFrame {
 		});
 	}
 
+	/**
+	 * Method to attach the action when there's a click on the start auto pilot
+	 * button
+	 */
 	private void setBtnStartAutoPilotListener() {
 		_btnStartAutoPilot.addActionListener(new ActionListener() {
 			@Override
@@ -1628,6 +1816,10 @@ public class RobotClientUI extends JFrame {
 		});
 	}
 
+	/**
+	 * Method to attach the action when there's a click on the stop auto pilot
+	 * button
+	 */
 	private void setBtnStopAutoPilotListener() {
 		_btnStopAutoPilot.addActionListener(new ActionListener() {
 			@Override

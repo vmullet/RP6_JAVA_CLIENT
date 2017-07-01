@@ -132,7 +132,7 @@ public final class RobotIO {
 	/**
 	 * Static Method to translate a string command into a DriveCommand object
 	 * @param instruction The command instruction to translate
-	 * @return
+	 * @return The DriveCommand based on the string instruction parameter
 	 */
 	private static DriveCommand getDriveCommandFromString(String instruction) {
 
