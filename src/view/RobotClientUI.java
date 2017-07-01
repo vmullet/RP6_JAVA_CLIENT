@@ -53,6 +53,11 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 
 @SuppressWarnings("serial")
+/**
+ * Class which contains the UI for the graphical mode of the client
+ * @author Valentin
+ *
+ */
 public class RobotClientUI extends JFrame {
 
 	private JPanel _contentPane;

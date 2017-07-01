@@ -21,11 +21,28 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
+/**
+ * Class which contains the JDialog Popup to edit a driveCommand inside the Trajectory Editor
+ * @author Valentin
+ *
+ */
 public class PopupCommandEditor extends JDialog {
 
+	/**
+	 * The JPanel containing all fields
+	 */
 	private final JPanel contentPanel = new JPanel();
+	/**
+	 * The ComboBox concerning the direction to edit
+	 */
 	private JComboBox<RobotDirection> _cb_robot_direction;
+	/**
+	 * The textField concerning the speed to edit
+	 */
 	private JTextField _txt_speed_robot;
+	/**
+	 * The textField concerning the duration to edit
+	 */
 	private JTextField _txt_duration_command;
 
 
@@ -113,6 +130,13 @@ public class PopupCommandEditor extends JDialog {
 		
 	}
 	
+	/**
+	 * Method to check if all fields values are correct
+	 * @param combo	The comboBox to check
+	 * @param speed	The textField to check
+	 * @param duration The textField to check
+	 * @return	TRUE or FALSE if the values are correct
+	 */
 	public static boolean checkValues(JComboBox<RobotDirection> combo,JTextField speed,JTextField duration) {
 		boolean ok = false;
 		if (combo.getSelectedIndex() != -1 && !speed.getText().equals("") && !duration.getText().equals("")) {
@@ -141,6 +165,10 @@ public class PopupCommandEditor extends JDialog {
 		return ok;
 	}
 	
+	/**
+	 * Method to make the popup visible or not
+	 * @param show The boolean to make the popup visible or not
+	 */
 	public void showUI(boolean show) {
 		
 		setVisible(show);
