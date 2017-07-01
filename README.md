@@ -36,6 +36,11 @@ The project contains multiple packages :
 - **enums** : Package containing all project's enums which describes different type of states for the robot
 - **console** : Package containing classes related to the console mode of the Java client
 
+Others Folders :
+
+- **ext** : Folder containing the C programs sources needed for the RP6 robot (base + Wifi-Module)
+- **doc** : Folder containing the JavaDoc of this project
+
 ## Object structure
 
 The different classes in the project have a defined role which is the following :
