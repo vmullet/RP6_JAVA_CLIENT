@@ -8,9 +8,9 @@ Of course, this supposes that you have the WIFI-Module installed on the robot.
 
 To control the RP6, you will need to have installed 2 Programs on the RP6. You can find them on the [RP6 website][rp6_link].
 
-On the base, you need to install the example program **I2C-Master-Slave**.
+On the base, you need to install the program inside ext/rp6_programs.zip **I2C-Master-Slave**.
 
-On the wifi module, you need to install the program **WIFI-REMOTE-CONTROL-2** (A link to download it will be posted soon)
+On the wifi module, you need to install the program inside ext/rp6_programs.zip **WIFI_Module**
 
 The installation can be done by using the software **RP6-LOADER** from the CD containing drivers for the robot.
 
