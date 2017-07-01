@@ -3,7 +3,7 @@ package model;
 /**
  * Class used to store and update the data sent by the robot
  * everytime new ones are received
- * du robot RP6
+ * from the RP6 robot
  * @author Valentin
  *
  */
