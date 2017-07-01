@@ -182,7 +182,7 @@ public class RobotSensorsData {
 	
 	/**
 	 * Setter for the {@link RobotSensorsData#_powerRight}
-	 * @param _batteryPower The new value to affect to the attribute
+	 * @param _powerRight The new value to affect to the attribute
 	 */
 	public void set_powerRight(int _powerRight) {
 		this._powerRight = _powerRight;

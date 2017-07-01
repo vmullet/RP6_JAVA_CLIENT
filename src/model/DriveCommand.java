@@ -120,7 +120,7 @@ public class DriveCommand {
 	
 	/**
 	 * Metrhod to translate a DriveCommand to a line of a traj file
-	 * @return
+	 * @return	The translated DriveCommand into a traj file syntax
 	 */
 	public String toStringTraj() {
 		return getCommandFromDirection(_robotDirection) + "{" + _robotSpeed + "}->" + _commandDuration;
