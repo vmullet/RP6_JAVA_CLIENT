@@ -119,7 +119,7 @@ public class RobotTrajectory {
 
 	/**
 	 * Method to get the number of driveCommands into the list
-	 * @return
+	 * @return The number of commands into the list
 	 */
 	public int getCommandsListSize() {
 		return _driveCommands.size();

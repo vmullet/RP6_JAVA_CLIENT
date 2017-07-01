@@ -35,7 +35,7 @@ public class DriveCommand {
 
 	/**
 	 * Constructor with 3 parameters
-	 * @param dir_letter A dir letter to translate into a RobotDirection Object (f->FORWARD for example...)
+	 * @param dir_letter A dir letter to translate into a RobotDirection Object (f=FORWARD for example...)
 	 * @param p_speed The speed for this command
 	 * @param p_duration The duration for this command
 	 */

@@ -47,7 +47,9 @@ public class PopupCommandEditor extends JDialog {
 
 
 	/**
-	 * Create the dialog.
+	 * The constructor with two parameters for the popup
+	 * @param parent The parent Jframe which has opened the popup
+	 * @param commandIndex The commandIndex of the drive command to edit inside the robotTrajectory
 	 */
 	public PopupCommandEditor(RobotClientUI parent, int commandIndex) {
 		setTitle("Edit Command n\u00B0 " + commandIndex);
