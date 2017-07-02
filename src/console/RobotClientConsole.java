@@ -452,7 +452,7 @@ public class RobotClientConsole {
 		writeWithBreak(
 				"------------------------------- COMMANDES FONCTIONNANT UNIQUEMENT SI L'ON EST EN MODE COMMAND  ---------------------------------------",
 				2);
-		writeWithBreak("4: Contrôle du robot", 2);
+		writeWithBreak("5: Contrôle du robot", 2);
 		writeWithBreak("[f|b|l|r][0-9]+		|	Syntaxe d'une commande pour piloter le robot", 1);
 		writeWithBreak("f,b,l,r			|	Commandes directionnelles (f = forward , b = backward, l = left, r = right",
 				1);
