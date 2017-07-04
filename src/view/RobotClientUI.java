@@ -41,6 +41,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.URL;
 
 import javax.swing.JTextField;
@@ -1684,55 +1687,61 @@ public class RobotClientUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				_btnConnect.setEnabled(false);
-				_txtAdrIp.setEnabled(false);
-				_txtRobotPort.setEnabled(false);
-				BlinkerUI bk = new BlinkerUI(_imgConnectionState, new ImageIcon[] {
-						new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW), new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK) });
-				bk.startBlink();
-				writeToLogArea("Connexion en cours vers " + _txtAdrIp.getText() + ":" + _txtRobotPort.getText());
-				_myClient.openConnection(_txtAdrIp.getText(),Integer.parseInt(_txtRobotPort.getText()));
-				Thread t1 = new Thread() {
-					@Override
-					public void run() {
-						while (_myClient.is_connecting()) {
+				if (_txtAdrIp.getText() != "" && _txtRobotPort.getText() != "") {
+					_btnConnect.setEnabled(false);
+					_txtAdrIp.setEnabled(false);
+					_txtRobotPort.setEnabled(false);
+					BlinkerUI bk = new BlinkerUI(_imgConnectionState, new ImageIcon[] {
+							new ImageIcon(IMG_TRAFFIC_LIGHT_YELLOW), new ImageIcon(IMG_TRAFFIC_LIGHT_BLACK) });
+					bk.startBlink();
+					writeToLogArea("Connexion en cours vers " + _txtAdrIp.getText() + ":" + _txtRobotPort.getText());
+					_myClient.openConnection(_txtAdrIp.getText(),Integer.parseInt(_txtRobotPort.getText()));
+					Thread t1 = new Thread() {
+						@Override
+						public void run() {
+							while (_myClient.is_connecting()) {
+								try {
+									Thread.sleep(500);
+
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+
 							try {
-								Thread.sleep(500);
+								bk.stopBlink();
+								Thread.sleep(200);
+								if (_myClient.is_connected()) {
+									_btnDisconnect.setEnabled(true);
+									_imgConnectionState.setIcon(new ImageIcon(IMG_TRAFFIC_LIGHT_GREEN));
+									_tabPane.setEnabledAt(0, true);
+									_tabPane.setEnabledAt(1, true);
+									_tabPane.setEnabledAt(2, true);
+									writeToLogArea("Connecté au RP6 (" + _txtAdrIp.getText() + ")");
+									displayRobotData();
+								} else {
+									_btnConnect.setEnabled(true);
+									_txtAdrIp.setEnabled(true);
+									_txtRobotPort.setEnabled(true);
+									writeToLogArea("Erreur de connexion (TimeOut)");
+								}
 
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
+
 						}
 
-						try {
-							bk.stopBlink();
-							Thread.sleep(200);
-							if (_myClient.is_connected()) {
-								_btnDisconnect.setEnabled(true);
-								_imgConnectionState.setIcon(new ImageIcon(IMG_TRAFFIC_LIGHT_GREEN));
-								_tabPane.setEnabledAt(0, true);
-								_tabPane.setEnabledAt(1, true);
-								_tabPane.setEnabledAt(2, true);
-								writeToLogArea("Connecté au RP6 (" + _txtAdrIp.getText() + ")");
-								displayRobotData();
-							} else {
-								_btnConnect.setEnabled(true);
-								_txtAdrIp.setEnabled(true);
-								_txtRobotPort.setEnabled(true);
-								writeToLogArea("Erreur de connexion (TimeOut)");
-							}
-
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-					}
-
-				};
-				t1.start();
-				requestFocusInWindow();
+					};
+					t1.start();
+					requestFocusInWindow();
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Veuillez saisir une adresse IP et un port valide");
+				}
+				
 			}
 
 		});
@@ -1799,6 +1808,7 @@ public class RobotClientUI extends JFrame {
 						
 						while (_previewLoadedTrajectory.is_running()) {
 							selectPreviewSegment(_previewLoadedTrajectory.get_currentCommandIndex());
+							writeRp6File();
 							try {
 								Thread.sleep(50);
 							} catch (InterruptedException e) {
@@ -1833,5 +1843,35 @@ public class RobotClientUI extends JFrame {
 			}
 
 		});
+	}
+	
+	private void writeRp6File() {
+		try {
+			PrintWriter p = new PrintWriter(new File("robot_status.rp6"));
+			p.write("GRID_SIZE=" + _previewGridSize + "\n");
+			String traj_indexes = "";
+			for (int[] value : _previewSegmentMap.values()) {
+				for (int i = 0 ; i< value.length ; i++) {
+					traj_indexes += value[i];
+					if (i != value.length - 1)
+						traj_indexes += ";";
+				}
+					 
+			}
+			p.write("TRAJ_INDEXES=" + traj_indexes + "\n");
+			String curr_indexes = "";
+			int[] curr_indexesi  = _previewSegmentMap.get(_previewSelectedSegmentIndex);
+			for (int i = 0 ; i< curr_indexesi.length ; i++) {
+				curr_indexes += curr_indexesi[i];
+				if (i != curr_indexesi.length -1)
+					curr_indexes += ";";
+			}
+				
+			p.write("CURR_INDEXES=" + curr_indexes + "\n");
+			p.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

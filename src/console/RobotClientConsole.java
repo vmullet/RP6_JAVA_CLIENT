@@ -329,6 +329,7 @@ public class RobotClientConsole {
 			String traj_file = _scanner.nextLine();
 			_loadedTrajectory = RobotIO.readTrajFile(traj_file);
 			if (_loadedTrajectory != null) {
+				_loadedTrajectory.set_myClient(_client);
 				_loadedTrajectory.startAutoPilot();
 			}
 			else {

@@ -173,9 +173,6 @@ public class RobotTrajectory {
 		return duration;
 	}
 	
-	public void resetTrajectory() {
-		
-	}
 	
 	/**
 	 * Method to estimate the orientation of the robot after many commands
@@ -405,9 +402,9 @@ public class RobotTrajectory {
 	 */
 	private void turnLeft() {
 		_myClient.send("l");
-		_myClient.send("100");
+		_myClient.send("75");
 		try {
-			Thread.sleep(1765);
+			Thread.sleep(2200);
 			_myClient.send("stp");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -420,9 +417,9 @@ public class RobotTrajectory {
 	 */
 	private void tunrRight() {
 		_myClient.send("r");
-		_myClient.send("100");
+		_myClient.send("75");
 		try {
-			Thread.sleep(1750);
+			Thread.sleep(2200);
 			_myClient.send("stp");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
