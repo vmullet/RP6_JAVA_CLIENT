@@ -87,7 +87,7 @@ public class RobotSensorsData {
 	/**
 	 * Maximum value when the battery power is at 100% (mostly 7.2V)
 	 */
-	final int FULL_BATTERY_POWER = 720;
+	final int FULL_BATTERY_POWER = 830;
 	
 	/**
 	 * Default constructor
@@ -121,7 +121,7 @@ public class RobotSensorsData {
 	 * @return The attribute in percentage
 	 */
 	public int getBatteryPercentage() {
-		return (_batteryPower - 560) * 100 / (720 - 560);
+		return (_batteryPower - 560) * 100 / (FULL_BATTERY_POWER - 560);
 	}
 	
 	/**

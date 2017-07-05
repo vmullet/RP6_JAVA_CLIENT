@@ -275,6 +275,9 @@ public class RobotClientConsole {
 			writeWithBreak("Fermeture de RP6 Client...", 1);
 			writeWithBreak("RP6 Client fermé", 1);
 			break;
+			
+		case "":
+			break;
 
 		default:
 			writeWithBreak("Commande introuvable. Veuillez utiliser la commande .help si vous avez besoin d'aide", 1);
